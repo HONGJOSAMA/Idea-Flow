@@ -1,11 +1,10 @@
 body {
-    background-color: #1a1a1a;
-    background-image: url("data:image/svg+xml,%3Csvg width='42' height='44' viewBox='0 0 42 44' xmlns='http://www.w3.org/2000/svg'%3E%3Cg id='Page-1' fill='none' fill-rule='evenodd'%3E%3Cg id='brick-wall' fill='%23333333' fill-opacity='0.4'%3E%3Cpath d='M0 0h42v44H0V0zm1 1h40v20H1V1zM0 23h20v20H0V23zm22 0h20v20H22V23z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    color: white;
+    background-color: #FFFDD0; /* Soft cream background */
+    color: #000; /* Default text color to black */
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: flex; /* Kept for overall centering, but will be managed by input-bar for bottom */
+    justify-content: center; /* Kept for overall centering */
+    align-items: center; /* Kept for overall centering */
     height: 100vh;
     margin: 0;
     overflow: hidden;
@@ -19,57 +18,74 @@ body {
     height: 100%;
 }
 
+#input-bar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 600px; /* Limit width for better appearance */
+    padding: 15px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #FFFDD0; /* Cream background for the bar */
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.1); /* Subtle shadow at the top */
+    z-index: 1000; /* Ensure it's always on top */
+    gap: 10px; /* Space between input and button */
+}
+
 #idea-input {
-    position: relative;
-    z-index: 10;
+    position: static; /* No longer relative, managed by parent flexbox */
+    z-index: auto;
     padding: 15px 30px;
     border-radius: 50px;
-    border: 1px solid #555;
-    background-color: #2c2c2c;
-    color: white;
+    border: 2px solid #000; /* Black border */
+    background-color: #FFFDD0; /* Cream background */
+    color: #000; /* Black text */
     font-size: 1.2em;
     text-align: center;
     outline: none;
     transition: all 0.3s ease;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5), 0 5px 10px rgba(0,0,0,0.4);
+    box-shadow: none; /* Clean shadow */
+    flex-grow: 1; /* Allow input to grow */
+    max-width: 400px;
 }
 
 #idea-input:focus {
-    border-color: #00aaff;
-    box-shadow: 0 0 25px rgba(0, 170, 255, 0.7), 0 0 40px rgba(0, 170, 255, 0.5), 0 5px 10px rgba(0,0,0,0.4);
+    border-color: #000; /* Still black on focus */
+    box-shadow: 0 0 10px rgba(0,0,0,0.2); /* Subtle black glow on focus */
 }
 
 #submit-idea {
-    position: relative;
-    z-index: 10;
+    position: static; /* No longer relative, managed by parent flexbox */
+    z-index: auto;
     padding: 15px 30px;
     border-radius: 50px;
-    border: 1px solid #00aaff;
-    background-color: #00aaff;
-    color: white;
+    border: 2px solid #000; /* Black border */
+    background-color: #000; /* Black background */
+    color: #FFFDD0; /* Cream text */
     font-size: 1.2em;
     cursor: pointer;
     outline: none;
     transition: all 0.3s ease;
-    box-shadow: 0 0 15px rgba(0, 170, 255, 0.5), 0 5px 10px rgba(0,0,0,0.4);
-    margin-left: 10px; /* Space between input and button */
+    box-shadow: none; /* Clean shadow */
 }
 
 #submit-idea:hover {
-    background-color: #0088cc;
-    border-color: #0088cc;
-    box-shadow: 0 0 20px rgba(0, 170, 255, 0.8), 0 0 30px rgba(0, 170, 255, 0.6), 0 5px 10px rgba(0,0,0,0.4);
+    background-color: #333; /* Slightly lighter black on hover */
+    border-color: #333;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3); /* Subtle black glow on hover */
 }
 
 .idea {
     position: absolute;
     padding: 10px 20px;
-    background-color: rgba(0, 170, 255, 0.7); /* A more subtle, text-friendly background */
-    color: white;
+    background-color: #FFFDD0; /* Cream background */
+    color: #000; /* Black text */
+    border: 2px solid #000; /* Thick black border */
     border-radius: 15px; /* Rounded rectangle */
-    box-shadow: 
-        0 4px 8px rgba(0,0,0,0.3), 
-        0 0 15px rgba(0, 170, 255, 0.5);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle black shadow */
     font-size: 1.1em;
     text-align: center;
     display: flex; /* Use flexbox for centering text */
@@ -85,33 +101,41 @@ body {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 70px; /* Slightly larger */
-    height: 70px; /* Slightly larger */
-    background: rgba(20, 20, 20, 0.8); /* Dark background with transparency */
-    border: 2px solid #ff4d4d; /* Neon red border */
-    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(145deg, #ff99cc, #ff6699); /* Pink jelly gradient */
+    border: 2px solid #ff0066; /* Deeper pink border */
+    border-radius: 40% 60% 70% 30% / 60% 40% 60% 40%; /* Pebble shape */
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2.2em; /* Slightly larger icon */
-    color: #ff4d4d; /* Neon red color for icon */
+    font-size: 2.2em;
+    color: white; /* White icon for contrast */
     cursor: default;
     z-index: 100;
     box-shadow: 
-        0 0 10px #ff4d4d, /* Inner glow */
-        0 0 20px rgba(255, 77, 77, 0.5); /* Outer glow */
-    backdrop-filter: blur(5px); /* Glass effect */
-    -webkit-backdrop-filter: blur(5px); /* Safari compatibility */
-    transition: all 0.3s ease; /* Smooth transitions for all properties */
+        0 0 15px rgba(255, 0, 102, 0.7), /* Pink glow */
+        inset 0 0 10px rgba(255, 255, 255, 0.5); /* Inner light */
+    transition: all 0.3s cubic-bezier(.17,.67,.83,.67); /* Jelly-like transition */
+    animation: jelly-bounce 4s infinite ease-in-out; /* Subtle continuous bounce */
 }
 
 #trash-can.trash-can-hover {
-    transform: scale(1.15); /* Enlarge more on hover */
+    transform: scale(1.3) rotate(5deg); /* Larger and slightly rotated on hover */
     box-shadow: 
-        0 0 20px #ff4d4d, 
-        0 0 40px rgba(255, 77, 77, 0.8),
-        0 0 60px rgba(255, 77, 77, 0.6); /* Stronger glow on hover */
-    border-color: #ff8a8a; /* Lighter border on hover */
+        0 0 30px rgba(255, 0, 102, 1), 
+        0 0 60px rgba(255, 0, 102, 0.8),
+        inset 0 0 20px rgba(255, 255, 255, 0.8); /* Stronger glow */
+    border-color: #ff3399; /* Stronger border on hover */
+    animation: none; /* Pause continuous bounce, maybe add a different reaction later */
+}
+
+@keyframes jelly-bounce {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.05); }
+    50% { transform: scale(0.95); }
+    75% { transform: scale(1.02); }
+    100% { transform: scale(1); }
 }
 
 
