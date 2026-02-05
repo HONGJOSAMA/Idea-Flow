@@ -78,7 +78,7 @@ body {
     white-space: pre-wrap; /* Allows text to wrap and respects newlines if any */
     word-break: break-word; /* Breaks long words */
     max-width: 250px; /* Limit width for better readability */
-    /* Removed animation properties as they are no longer used */
+    box-sizing: border-box; /* Include padding in element's total width and height */
 }
 
 
