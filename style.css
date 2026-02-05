@@ -39,6 +39,28 @@ body {
     box-shadow: 0 0 25px rgba(0, 170, 255, 0.7), 0 0 40px rgba(0, 170, 255, 0.5), 0 5px 10px rgba(0,0,0,0.4);
 }
 
+#submit-idea {
+    position: relative;
+    z-index: 10;
+    padding: 15px 30px;
+    border-radius: 50px;
+    border: 1px solid #00aaff;
+    background-color: #00aaff;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.5), 0 5px 10px rgba(0,0,0,0.4);
+    margin-left: 10px; /* Space between input and button */
+}
+
+#submit-idea:hover {
+    background-color: #0088cc;
+    border-color: #0088cc;
+    box-shadow: 0 0 20px rgba(0, 170, 255, 0.8), 0 0 30px rgba(0, 170, 255, 0.6), 0 5px 10px rgba(0,0,0,0.4);
+}
+
 .idea {
     position: absolute;
     padding: 10px 20px;
