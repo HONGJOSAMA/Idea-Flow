@@ -41,63 +41,22 @@ body {
 
 .idea {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 50px;
-    height: 50px;
-    background: radial-gradient(circle, #ff8a00, #e52e71);
-    border-radius: 50%;
+    padding: 10px 20px;
+    background-color: rgba(0, 170, 255, 0.7); /* A more subtle, text-friendly background */
+    color: white;
+    border-radius: 15px; /* Rounded rectangle */
     box-shadow: 
-        0 0 20px rgba(255, 138, 0, 0.8), 
-        0 0 30px rgba(229, 46, 113, 0.6),
-        inset 0 0 10px rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    opacity: 1;
-    animation-duration: 2s;
-    animation-timing-function: ease-out;
-    animation-fill-mode: forwards;
+        0 4px 8px rgba(0,0,0,0.3), 
+        0 0 15px rgba(0, 170, 255, 0.5);
+    font-size: 1.1em;
+    text-align: center;
+    display: flex; /* Use flexbox for centering text */
+    justify-content: center;
+    align-items: center;
+    white-space: pre-wrap; /* Allows text to wrap and respects newlines if any */
+    word-break: break-word; /* Breaks long words */
+    max-width: 250px; /* Limit width for better readability */
+    /* Removed animation properties as they are no longer used */
 }
 
-.move-up {
-    animation-name: move-up;
-}
 
-.move-down {
-    animation-name: move-down;
-}
-
-.move-left {
-    animation-name: move-left;
-}
-
-.move-right {
-    animation-name: move-right;
-}
-
-@keyframes move-up {
-    to {
-        transform: translate(-50%, -150vh);
-        opacity: 0;
-    }
-}
-
-@keyframes move-down {
-    to {
-        transform: translate(-50%, 150vh);
-        opacity: 0;
-    }
-}
-
-@keyframes move-left {
-    to {
-        transform: translate(-150vw, -50%);
-        opacity: 0;
-    }
-}
-
-@keyframes move-right {
-    to {
-        transform: translate(150vw, -50%);
-        opacity: 0;
-    }
-}

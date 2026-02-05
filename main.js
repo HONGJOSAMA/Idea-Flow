@@ -4,23 +4,28 @@ const canvas = document.getElementById('canvas');
 ideaInput.addEventListener('keydown', function(event) {
     if (event.key === 'Enter') {
         event.preventDefault();
-        const direction = ideaInput.value.toLowerCase().trim();
+        const ideaText = ideaInput.value.trim();
         
-        if (['up', 'down', 'left', 'right'].includes(direction)) {
-            createIdea(direction);
+        if (ideaText !== '') {
+            createIdea(ideaText);
             ideaInput.value = '';
         }
     }
 });
 
-function createIdea(direction) {
+function createIdea(text) {
     const idea = document.createElement('div');
     idea.classList.add('idea');
-    idea.classList.add(`move-${direction}`);
+    idea.textContent = text; // Display the text
+    
+    // Position the idea randomly for now, or based on some logic if defined later
+    idea.style.left = `${Math.random() * (canvas.offsetWidth - 100)}px`;
+    idea.style.top = `${Math.random() * (canvas.offsetHeight - 50)}px`;
     
     canvas.appendChild(idea);
     
-    setTimeout(() => {
-        idea.remove();
-    }, 2000); // Remove the element after the animation completes (2s)
+    // For now, ideas will persist. Remove timeout for general ideas.
+    // setTimeout(() => {
+    //     idea.remove();
+    // }, 2000); 
 }
