@@ -7,13 +7,14 @@ const submitIdeaButton = document.getElementById('submit-idea');
 
 // Firebase Configuration (REPLACE WITH YOUR OWN CONFIG)
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyA0qJK-HHAQq3gMycw6XhFq12M_Ghch_JY",
+  authDomain: "idea-flow-96127.firebaseapp.com",
+  databaseURL: "https://idea-flow-96127-default-rtdb.firebaseio.com",
+  projectId: "idea-flow-96127",
+  storageBucket: "idea-flow-96127.firebasestorage.app",
+  messagingSenderId: "943449839762",
+  appId: "1:943449839762:web:cda7e64421a213586f2e4b",
+  measurementId: "G-1GBYVBG88D"
 };
 
 // Initialize Firebase
