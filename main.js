@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
 
 const ideaInput = document.getElementById('idea-input');
 const canvas = document.getElementById('canvas');
@@ -112,6 +112,11 @@ const IDEA_BASE_SPEED = 2; // Base speed for ideas
 const IDEA_SIZE = 50; // Approximate size of an idea for collision detection
 
 function renderIdeaFromFirebaseData(ideaData, firebaseKey) {
+    // Prevent duplicate rendering if idea already exists in IDEAS array
+    if (IDEAS.some(idea => idea.key === firebaseKey)) {
+        return;
+    }
+
     const ideaDiv = document.createElement('div');
     ideaDiv.classList.add('idea');
     ideaDiv.textContent = ideaData.text; // Display the text
@@ -258,3 +263,4 @@ function animate(currentTime) {
 
 // Start the animation loop
 requestAnimationFrame(animate);
+

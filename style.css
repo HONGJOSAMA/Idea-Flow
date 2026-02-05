@@ -85,23 +85,33 @@ body {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 60px;
-    height: 60px;
-    background-color: rgba(255, 0, 0, 0.5);
+    width: 70px; /* Slightly larger */
+    height: 70px; /* Slightly larger */
+    background: rgba(20, 20, 20, 0.8); /* Dark background with transparency */
+    border: 2px solid #ff4d4d; /* Neon red border */
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2em;
+    font-size: 2.2em; /* Slightly larger icon */
+    color: #ff4d4d; /* Neon red color for icon */
     cursor: default;
-    z-index: 100; /* Ensure it's above other elements */
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    z-index: 100;
+    box-shadow: 
+        0 0 10px #ff4d4d, /* Inner glow */
+        0 0 20px rgba(255, 77, 77, 0.5); /* Outer glow */
+    backdrop-filter: blur(5px); /* Glass effect */
+    -webkit-backdrop-filter: blur(5px); /* Safari compatibility */
+    transition: all 0.3s ease; /* Smooth transitions for all properties */
 }
 
 #trash-can.trash-can-hover {
-    background-color: rgba(255, 0, 0, 0.9);
-    transform: scale(1.1);
+    transform: scale(1.15); /* Enlarge more on hover */
+    box-shadow: 
+        0 0 20px #ff4d4d, 
+        0 0 40px rgba(255, 77, 77, 0.8),
+        0 0 60px rgba(255, 77, 77, 0.6); /* Stronger glow on hover */
+    border-color: #ff8a8a; /* Lighter border on hover */
 }
 
 
