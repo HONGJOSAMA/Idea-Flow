@@ -160,3 +160,45 @@ body {
     color: white;
     transform: scale(1.05);
 }
+/* ===== 상단 제목 입력 바 ===== */
+#title-bar {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3000;
+
+    /* 배경 제거 → 인풋만 보이게 */
+    pointer-events: none;
+}
+
+/* 실제 입력창 */
+#title-input {
+    pointer-events: auto;
+
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 999px;
+
+    padding: 10px 22px;
+    min-width: 160px;
+    max-width: 520px;
+
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--text-color);
+
+    outline: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    transition: all 0.25s ease;
+}
+
+/* 포커스 시 Apple 스타일 */
+#title-input:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.25);
+}

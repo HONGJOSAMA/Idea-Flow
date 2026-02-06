@@ -353,3 +353,16 @@ function animate(currentTime) {
 // 시작
 loadFromLocal();
 requestAnimationFrame(animate);
+
+const titleInput = document.getElementById('title-input');
+
+// 불러오기
+const savedTitle = localStorage.getItem('canvas_title');
+if (savedTitle) {
+    titleInput.value = savedTitle;
+}
+
+// 저장
+titleInput.addEventListener('input', () => {
+    localStorage.setItem('canvas_title', titleInput.value);
+});
