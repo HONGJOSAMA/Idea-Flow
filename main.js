@@ -361,7 +361,26 @@ function animate(currentTime) {
 loadFromLocal();
 requestAnimationFrame(animate);
 
+// ===== 타이틀 자동 크기 조절 =====
 const titleInput = document.getElementById('title-input');
+
+function adjustTitleWidth() {
+    const temp = document.createElement('span');
+    temp.style.position = 'absolute';
+    temp.style.visibility = 'hidden';
+    temp.style.whiteSpace = 'pre';
+    temp.style.fontSize = '20px';
+    temp.style.fontWeight = '600';
+    temp.style.fontFamily = "'Inter', -apple-system, sans-serif";
+    temp.style.padding = '0 22px';
+    temp.textContent = titleInput.value || titleInput.placeholder;
+    document.body.appendChild(temp);
+    
+    const width = Math.max(160, Math.min(520, temp.offsetWidth + 10));
+    titleInput.style.width = width + 'px';
+    
+    document.body.removeChild(temp);
+}
 
 const savedTitle = localStorage.getItem('canvas_title');
 if (savedTitle) {
@@ -370,4 +389,7 @@ if (savedTitle) {
 
 titleInput.addEventListener('input', () => {
     localStorage.setItem('canvas_title', titleInput.value);
+    adjustTitleWidth();
 });
+
+adjustTitleWidth();

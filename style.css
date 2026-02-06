@@ -184,6 +184,9 @@ body {
     border-radius: 999px;
 
     padding: 10px 22px;
+    
+    /* ✅ 자동 크기 조절 */
+    width: auto;
     min-width: 160px;
     max-width: 520px;
 
@@ -194,9 +197,10 @@ body {
 
     outline: none;
     box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-    transition: all 0.25s ease;
+    
+    /* ✅ 부드러운 크기 변화 애니메이션 */
+    transition: width 0.2s ease;
 }
-
 /* 포커스 시 Apple 스타일 */
 #title-input:focus {
     border-color: var(--accent-blue);
