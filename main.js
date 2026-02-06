@@ -5,11 +5,10 @@ const modeToggleButton = document.getElementById('mode-toggle');
 const trashCan = document.getElementById('trash-can');
 
 let currentMode = 'bounce';
-let IDEAS = []; // const 대신 let으로 변경 (초기화 용이성)
-const IDEA_BASE_SPEED = 1.5; // 애플스러운 부드러운 속도
+let IDEAS = [];
+const IDEA_BASE_SPEED = 1.5;
 let lastTime = 0;
-
-let isComposing = false; // IME 구성 상태 추적
+let isComposing = false;
 
 // 1. 로컬 저장소 로직
 function saveToLocal() {
@@ -20,7 +19,7 @@ function saveToLocal() {
         vx: i.vx,
         vy: i.vy,
         modeClass: Array.from(i.div.classList).join(' '),
-        fontSize: i.div.style.fontSize || null // 글자 크기 저장
+        fontSize: i.div.style.fontSize || null
     }));
     localStorage.setItem('apple_canvas_final_v3', JSON.stringify(data));
 }
@@ -28,7 +27,6 @@ function saveToLocal() {
 function loadFromLocal() {
     const saved = localStorage.getItem('apple_canvas_final_v3');
     if (saved) {
-        // [중요] 중복 방지: 로드 전 캔버스와 배열을 완전히 비웁니다.
         canvas.innerHTML = ''; 
         IDEAS = []; 
         
@@ -65,7 +63,6 @@ function createIdeaElement(text, savedData = null) {
         applyModeStyle(ideaObject);
     }
     
-    // 글자 크기 로드
     if (savedData && savedData.fontSize) {
         ideaDiv.style.fontSize = savedData.fontSize;
     }
@@ -74,14 +71,13 @@ function createIdeaElement(text, savedData = null) {
     IDEAS.push(ideaObject);
 }
 
-// 3. 드래그 로직 (중복 트리거 방지를 위한 stopPropagation 추가)
+// 3. 드래그 로직
 let isDragging = false;
 let draggedIdea = null;
 
 function onMouseDown(e, ideaObj) {
     if (e.button !== 0) return;
 
-    // ✅ 선택 처리 (드래그보다 먼저)
     if (selectedIdea && selectedIdea !== ideaObj) {
         selectedIdea.div.classList.remove('selected');
     }
@@ -89,7 +85,7 @@ function onMouseDown(e, ideaObj) {
     selectedIdea = ideaObj;
     ideaObj.div.classList.add('selected');
 
-    e.stopPropagation(); // 이벤트 전파 방지
+    e.stopPropagation();
 
     isDragging = true;
     draggedIdea = ideaObj;
@@ -137,8 +133,6 @@ function onMouseDown(e, ideaObj) {
 }
 
 // 4. 물리 및 경계 처리
-// 4. 물리 및 경계 처리
-// 4. 물리 및 경계 처리
 function updateIdeaMovement(ideaObject, deltaTime) {
     if (isDragging && draggedIdea === ideaObject) return;
     
@@ -150,28 +144,31 @@ function updateIdeaMovement(ideaObject, deltaTime) {
     const h = div.offsetHeight;
 
     if (currentMode === 'piano') {
-        // ⬅️ 왼쪽으로 완전히 벗어나면
         if (x + w < 0) {
-            // 🚫 잠시 숨김
-            div.style.opacity = '0';
+            div.style.display = 'none';
             
-            // 👉 오른쪽 완전 바깥으로 이동
             x = canvas.offsetWidth + w + 50;
             y = Math.random() * (canvas.offsetHeight - h);
 
-            // 🎨 색상 재설정
             div.classList.remove('piano-white', 'piano-black');
             div.classList.add(
                 Math.random() > 0.5 ? 'piano-black' : 'piano-white'
             );
             
-            // 🎬 다음 프레임에서 다시 보이게
+            ideaObject.x = x;
+            ideaObject.y = y;
+            ideaObject.vx = vx;
+            ideaObject.vy = vy;
+            
+            div.style.transform = `translate(${x}px, ${y}px)`;
+            
             setTimeout(() => {
-                div.style.opacity = '1';
-            }, 50);
+                div.style.display = 'block';
+            }, 100);
+            
+            return;
         }
         
-        // 🔝🔽 위아래 경계 처리
         if (y < 0) {
             y = 0;
             vy = 0;
@@ -185,8 +182,10 @@ function updateIdeaMovement(ideaObject, deltaTime) {
         if (y + h > canvas.offsetHeight || y < 0) { vy *= -0.7; y = y < 0 ? 0 : canvas.offsetHeight - h; }
     }
 
-    ideaObject.x = x; ideaObject.y = y;
-    ideaObject.vx = vx; ideaObject.vy = vy;
+    ideaObject.x = x;
+    ideaObject.y = y;
+    ideaObject.vx = vx;
+    ideaObject.vy = vy;
     div.style.transform = `translate(${x}px, ${y}px)`;
 }
 
@@ -200,16 +199,13 @@ function applyModeStyle(idea) {
     idea.div.classList.remove('piano-white', 'piano-black');
 
     if (currentMode === 'piano') {
-        // 🎨 랜덤 흑 / 백
         idea.div.classList.add(
             Math.random() > 0.5 ? 'piano-black' : 'piano-white'
         );
 
-        // 📍 오른쪽 바깥에서 시작
         idea.x = canvas.offsetWidth + idea.div.offsetWidth;
-        idea.y = Math.random() * (canvas.offsetHeight - idea.div.offsetHeight); // Corrected this line
+        idea.y = Math.random() * (canvas.offsetHeight - idea.div.offsetHeight);
         
-        // ⬅️ 왼쪽으로 일정 속도로 이동
         idea.vx = -(1.2 + Math.random() * 0.8);
         idea.vy = 0;
     } else {
@@ -219,7 +215,6 @@ function applyModeStyle(idea) {
     }
 }
 
-// [해결책 3] 중복 이벤트 리스너 제거 및 단일화
 const submitAction = (e) => {
     e.preventDefault();
     const text = ideaInput.value.trim();
@@ -257,29 +252,21 @@ modeToggleButton.onclick = () => {
 const resetButton = document.getElementById('reset-all');
 
 resetButton.onclick = () => {
-    // 모든 아이디어 제거
     IDEAS.forEach(i => i.div.remove());
     IDEAS = [];
 
-    // 선택 상태 초기화
     if (selectedIdea) {
         selectedIdea.div.classList.remove('selected');
         selectedIdea = null;
     }
 
-    // 로컬 스토리지 초기화
     localStorage.removeItem('apple_canvas_final_v3');
-    saveToLocal(); // 빈 상태를 저장
+    saveToLocal();
 };
-
-/* ===============================
-   Word 스타일 글자 크기 조절
-================================ */
 
 // 선택된 아이디어 상태
 let selectedIdea = null;
 
-// 아이디어 클릭 → 선택
 function attachSelectionHandler(ideaObject) {
     ideaObject.div.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -293,7 +280,6 @@ function attachSelectionHandler(ideaObject) {
     });
 }
 
-// 캔버스 클릭 → 선택 해제
 canvas.addEventListener('mousedown', () => {
     if (selectedIdea) {
         selectedIdea.div.classList.remove('selected');
@@ -301,7 +287,6 @@ canvas.addEventListener('mousedown', () => {
     }
 });
 
-// 글자 크기 버튼
 const biggerBtn = document.getElementById('font-bigger');
 const smallerBtn = document.getElementById('font-smaller');
 
@@ -333,12 +318,7 @@ smallerBtn.onclick = () => {
     saveToLocal();
 };
 
-/* ===============================
-   아이디어 간 충돌 처리
-================================ */
-
 function handleIdeaCollisions() {
-    // ✅ 피아노 모드에서는 충돌 처리 비활성화
     if (currentMode === 'piano') return;
     
     for (let i = 0; i < IDEAS.length; i++) {
@@ -367,29 +347,27 @@ function handleIdeaCollisions() {
         }
     }
 }
+
 function animate(currentTime) {
     const deltaTime = Math.min(currentTime - lastTime, 100); 
     lastTime = currentTime;
 
-    handleIdeaCollisions(); // ✅ 충돌 처리
+    handleIdeaCollisions();
 
     IDEAS.forEach(i => updateIdeaMovement(i, deltaTime));
     requestAnimationFrame(animate);
 }
 
-// 시작
 loadFromLocal();
 requestAnimationFrame(animate);
 
 const titleInput = document.getElementById('title-input');
 
-// 불러오기
 const savedTitle = localStorage.getItem('canvas_title');
 if (savedTitle) {
     titleInput.value = savedTitle;
 }
 
-// 저장
 titleInput.addEventListener('input', () => {
     localStorage.setItem('canvas_title', titleInput.value);
 });
