@@ -1,18 +1,33 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
-
 const ideaInput = document.getElementById('idea-input');
 const canvas = document.getElementById('canvas');
 const submitIdeaButton = document.getElementById('submit-idea');
-const trashCan = document.getElementById('trash-can'); // Reference to the trash can
-
-let currentMode = 'bounce'; // 'bounce' 또는 'piano'
 const modeToggleButton = document.getElementById('mode-toggle');
+const trashCan = document.getElementById('trash-can');
 
-let isDragging = false;
-let draggedIdea = null;
-let dragOffsetX = 0;
-let dragOffsetY = 0;
+let currentMode = 'bounce';
+const IDEAS = [];
+const IDEA_BASE_SPEED = 2;
+
+// --- 로컬 저장소 로직 ---
+function saveToLocal() {
+    const data = IDEAS.map(i => ({
+        text: i.div.textContent,
+        x: i.x,
+        y: i.y,
+        vx: i.vx,
+        vy: i.vy,
+        modeClass: Array.from(i.div.classList).filter(c => c !== 'idea').join(' ') // 'idea' 클래스 제외
+    }));
+    localStorage.setItem('my_private_ideas', JSON.stringify(data));
+}
+
+function loadFromLocal() {
+    const saved = localStorage.getItem('my_private_ideas');
+    if (saved) {
+        const data = JSON.parse(saved);
+        data.forEach(item => createIdeaElement(item.text, item));
+    }
+}
 
 // Helper to check if an idea is over the trash can
 function isOverTrashCan(ideaDiv, trashCanDiv) {
@@ -26,93 +41,6 @@ function isOverTrashCan(ideaDiv, trashCanDiv) {
         ideaRect.top > trashRect.bottom
     );
 }
-
-function onMouseDown(e) {
-    if (e.button !== 0) return; // Only left mouse button
-
-    draggedIdea = IDEAS.find(idea => idea.div === e.target);
-    if (!draggedIdea) return;
-
-    isDragging = true;
-    draggedIdea.div.style.cursor = 'grabbing';
-    draggedIdea.div.style.zIndex = 101; // Bring to front
-
-    // Pause animation for the dragged idea
-    draggedIdea.pausedVx = draggedIdea.vx; // Store original vx
-    draggedIdea.pausedVy = draggedIdea.vy; // Store original vy
-    draggedIdea.vx = 0;
-    draggedIdea.vy = 0;
-
-    // Calculate offset
-    const rect = draggedIdea.div.getBoundingClientRect();
-    dragOffsetX = e.clientX - rect.left;
-    dragOffsetY = e.clientY - rect.top;
-
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-
-    e.preventDefault(); // Prevent default drag behavior (e.g., image ghosting)
-}
-
-function onMouseMove(e) {
-    if (!isDragging || !draggedIdea) return;
-
-    // Update position
-    draggedIdea.x = e.clientX - dragOffsetX;
-    draggedIdea.y = e.clientY - dragOffsetY;
-    draggedIdea.div.style.transform = `translate(${draggedIdea.x}px, ${draggedIdea.y}px)`;
-
-    // Check for trash can hover
-    if (isOverTrashCan(draggedIdea.div, trashCan)) {
-        trashCan.classList.add('trash-can-hover');
-    } else {
-        trashCan.classList.remove('trash-can-hover');
-    }
-}
-
-function onMouseUp(e) {
-    if (!isDragging || !draggedIdea) return;
-
-    isDragging = false;
-    draggedIdea.div.style.cursor = 'grab';
-    draggedIdea.div.style.zIndex = ''; // Reset z-index
-
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('mouseup', onMouseUp);
-
-    if (isOverTrashCan(draggedIdea.div, trashCan)) {
-        // Delete idea from Firebase
-        remove(ref(database, `ideas/${draggedIdea.key}`));
-    } else {
-        // Resume animation
-        draggedIdea.vx = draggedIdea.pausedVx;
-        draggedIdea.vy = draggedIdea.pausedVy;
-    }
-
-    trashCan.classList.remove('trash-can-hover');
-    draggedIdea = null;
-}
-
-// Firebase Configuration (REPLACE WITH YOUR OWN CONFIG)
-const firebaseConfig = {
-  apiKey: "AIzaSyA0qJK-HHAQq3gMycw6XhFq12M_Ghch_JY",
-  authDomain: "idea-flow-96127.firebaseapp.com",
-  databaseURL: "https://idea-flow-96127-default-rtdb.firebaseio.com",
-  projectId: "idea-flow-96127",
-  storageBucket: "idea-flow-96127.firebasestorage.app",
-  messagingSenderId: "943449839762",
-  appId: "1:943449839762:web:cda7e64421a213586f2e4b",
-  measurementId: "G-1GBYVBG88D"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-const ideasRef = ref(database, 'ideas'); // Reference to the 'ideas' path in your database
-
-    const IDEAS = []; // Array to store all active idea objects
-const IDEA_BASE_SPEED = 2; // Base speed for ideas
-const IDEA_SIZE = 50; // Approximate size of an idea for collision detection
 
 // 아이디어 생성/렌더링 시 스타일 적용 함수
 function applyModeStyle(ideaObject) {
@@ -137,61 +65,106 @@ function applyModeStyle(ideaObject) {
     }
 }
 
-function renderIdeaFromFirebaseData(ideaData, firebaseKey) {    // Prevent duplicate rendering if idea already exists in IDEAS array
-    if (IDEAS.some(idea => idea.key === firebaseKey)) {
-        return;
-    }
-
+// --- 아이디어 생성 로직 (중복 방지를 위해 통합) ---
+function createIdeaElement(text, savedData = null) {
     const ideaDiv = document.createElement('div');
     ideaDiv.classList.add('idea');
-    ideaDiv.textContent = ideaData.text; // Display the text
-    ideaDiv.dataset.firebaseKey = firebaseKey; // Store Firebase key on the DOM element
-    ideaDiv.style.cursor = 'grab'; // Add grab cursor
-
-    // Generate new random x, y for initial rendering position (as requested)
-    const x = Math.random() * (canvas.offsetWidth - ideaDiv.offsetWidth);
-    const y = Math.random() * (canvas.offsetHeight - ideaDiv.offsetHeight);
-    
+    ideaDiv.textContent = text;
     canvas.appendChild(ideaDiv);
 
-    // Attach mousedown listener for dragging
-    ideaDiv.addEventListener('mousedown', onMouseDown);
+    const angle = Math.random() * 2 * Math.PI;
+    const speed = IDEA_BASE_SPEED + (Math.random() * 2);
 
     const ideaObject = {
         div: ideaDiv,
-        x: x, // Use newly generated random x
-        y: y, // Use newly generated random y
-        vx: ideaData.vx, // Use velocity from Firebase
-        vy: ideaData.vy, // Use velocity from Firebase
-        key: firebaseKey // Store Firebase key in the idea object
+        x: savedData && savedData.x !== undefined ? savedData.x : Math.random() * (canvas.offsetWidth - 100),
+        y: savedData && savedData.y !== undefined ? savedData.y : Math.random() * (canvas.offsetHeight - 100),
+        vx: savedData && savedData.vx !== undefined ? savedData.vx : Math.cos(angle) * speed,
+        vy: savedData && savedData.vy !== undefined ? savedData.vy : Math.sin(angle) * speed,
+        lastMouseX: 0,
+        lastMouseY: 0
     };
+
+    if (savedData && savedData.modeClass) {
+        savedData.modeClass.split(' ').forEach(cls => {
+            if (cls) ideaDiv.classList.add(cls);
+        });
+    }
+
+    ideaDiv.addEventListener('mousedown', (e) => onMouseDown(e, ideaObject));
     IDEAS.push(ideaObject);
     applyModeStyle(ideaObject);
 }
 
-// Listen for new ideas added to Firebase
-onChildAdded(ideasRef, (snapshot) => {
-    const ideaData = snapshot.val();
-    const ideaKey = snapshot.key; // Get the unique key generated by Firebase
-    renderIdeaFromFirebaseData(ideaData, ideaKey);
-});
+// --- 드래그 로직 (관성 추가) ---
+let isDragging = false;
+let draggedIdea = null;
 
-// Listen for ideas removed from Firebase
-onChildRemoved(ideasRef, (snapshot) => {
-    const removedKey = snapshot.key;
-    const index = IDEAS.findIndex(idea => idea.key === removedKey);
-    if (index !== -1) {
-        IDEAS[index].div.remove(); // Remove from DOM
-        IDEAS.splice(index, 1); // Remove from local array
-    }
-});
-
-function submitIdeaHandler() {
-    const ideaText = ideaInput.value.trim();
+function onMouseDown(e, ideaObj) {
+    if (e.button !== 0) return;
+    isDragging = true;
+    draggedIdea = ideaObj;
     
-    if (ideaText !== '') {
-        pushIdeaToFirebase(ideaText); // Call the function to push to Firebase
+    // 드래그 시작 시 위치 기록
+    draggedIdea.lastMouseX = e.clientX;
+    draggedIdea.lastMouseY = e.clientY;
+    
+    draggedIdea.div.style.cursor = 'grabbing';
+    // 드래그 시작 시 속도 0으로 초기화
+    draggedIdea.vx = 0;
+    draggedIdea.vy = 0;
+
+    const onMouseMove = (moveEvent) => {
+        if (!isDragging || !draggedIdea) return;
+        
+        // 마우스 이동 속도 계산 (마지막 위치와 현재 위치의 차이)
+        const dx = moveEvent.clientX - draggedIdea.lastMouseX;
+        const dy = moveEvent.clientY - draggedIdea.lastMouseY;
+        
+        draggedIdea.x += dx;
+        draggedIdea.y += dy;
+        
+        // 관성을 위해 현재 이동량을 속도로 비축
+        draggedIdea.vx = dx * 0.5; 
+        draggedIdea.vy = dy * 0.5;
+
+        draggedIdea.lastMouseX = moveEvent.clientX;
+        draggedIdea.lastMouseY = moveEvent.clientY;
+        
+        draggedIdea.div.style.transform = `translate(${draggedIdea.x}px, ${draggedIdea.y}px)`;
+        
+        if (isOverTrashCan(draggedIdea.div, trashCan)) trashCan.classList.add('trash-can-hover');
+        else trashCan.classList.remove('trash-can-hover');
+    };
+
+    const onMouseUp = () => {
+        isDragging = false;
+        if (draggedIdea) {
+            draggedIdea.div.style.cursor = 'grab';
+            if (isOverTrashCan(draggedIdea.div, trashCan)) {
+                draggedIdea.div.remove();
+                IDEAS.splice(IDEAS.indexOf(draggedIdea), 1);
+            }
+            saveToLocal(); // 변경사항 저장
+        }
+        trashCan.classList.remove('trash-can-hover');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        draggedIdea = null;
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    e.preventDefault(); // 기본 드래그 동작 방지
+}
+
+// --- 기존 핸들러 수정 ---
+function submitIdeaHandler() {
+    const text = ideaInput.value.trim();
+    if (text) {
+        createIdeaElement(text); // 로컬에서 즉시 생성 (Firebase push 제거)
         ideaInput.value = '';
+        saveToLocal(); // 변경사항 저장
     }
 }
 
@@ -216,21 +189,8 @@ modeToggleButton.addEventListener('click', () => {
     }
     
     IDEAS.forEach(idea => applyModeStyle(idea));
+    saveToLocal(); // 모드 변경 시에도 저장
 });
-
-function pushIdeaToFirebase(text) {
-    const angle = Math.random() * 2 * Math.PI;
-    const speed = IDEA_BASE_SPEED + (Math.random() * 2);
-    
-    const ideaData = {
-        text: text,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed
-    };
-
-    push(ideasRef, ideaData); 
-    // 여기서 직접 렌더링하지 않습니다. onChildAdded가 대신 처리합니다.
-}
 
 let lastTime = 0; // For calculating deltaTime
 
@@ -339,6 +299,8 @@ function animate(currentTime) {
     update(deltaTime);
     requestAnimationFrame(animate);
 }
+
+loadFromLocal();
 
 // Start the animation loop
 requestAnimationFrame(animate);

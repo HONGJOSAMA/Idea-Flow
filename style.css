@@ -121,7 +121,7 @@ body {
     font-weight: 800;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    min-width: 120px;
+    min-width: 140px;
 }
 
 #mode-toggle.active {
