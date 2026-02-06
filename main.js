@@ -1,3 +1,27 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('menu-toggle');
+    const sideMenu = document.getElementById('side-menu');
+    const mainContent = document.getElementById('main-content');
+
+    if (menuToggle && sideMenu) {
+        menuToggle.addEventListener('click', () => {
+            sideMenu.classList.toggle('open');
+            document.body.classList.toggle('menu-open');
+        });
+    }
+    
+    // Close menu when clicking on main content
+    if(mainContent) {
+        mainContent.addEventListener('click', () => {
+            if (sideMenu.classList.contains('open')) {
+                sideMenu.classList.remove('open');
+                document.body.classList.remove('menu-open');
+            }
+        });
+    }
+});
+
+
 const canvas = document.getElementById('canvas');
 const ideaInput = document.getElementById('idea-input');
 const submitIdeaButton = document.getElementById('submit-idea');
@@ -27,7 +51,7 @@ function saveToLocal() {
 function loadFromLocal() {
     const saved = localStorage.getItem('apple_canvas_final_v3');
     if (saved) {
-        canvas.innerHTML = ''; 
+        if(canvas) canvas.innerHTML = ''; 
         IDEAS = []; 
         
         const data = JSON.parse(saved);
@@ -39,7 +63,7 @@ function loadFromLocal() {
 
 // 2. 아이디어 생성 함수
 function createIdeaElement(text, savedData = null) {
-    if (!text) return;
+    if (!text || !canvas) return;
 
     const ideaDiv = document.createElement('div');
     ideaDiv.classList.add('idea');
@@ -224,24 +248,25 @@ const submitAction = (e) => {
         saveToLocal();
     }
 };
+if(submitIdeaButton) submitIdeaButton.onclick = submitAction;
 
-submitIdeaButton.onclick = submitAction;
+if(ideaInput) {
+    ideaInput.addEventListener('compositionstart', () => {
+        isComposing = true;
+    });
 
-ideaInput.addEventListener('compositionstart', () => {
-    isComposing = true;
-});
+    ideaInput.addEventListener('compositionend', () => {
+        isComposing = false;
+    });
 
-ideaInput.addEventListener('compositionend', () => {
-    isComposing = false;
-});
+    ideaInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter' && !isComposing) {
+            submitAction(e);
+        }
+    });
+}
 
-ideaInput.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter' && !isComposing) {
-        submitAction(e);
-    }
-});
-
-modeToggleButton.onclick = () => {
+if(modeToggleButton) modeToggleButton.onclick = () => {
     currentMode = currentMode === 'bounce' ? 'piano' : 'bounce';
     modeToggleButton.textContent = currentMode === 'piano' ? 'Piano Mode' : 'Flow Mode';
     modeToggleButton.classList.toggle('active', currentMode === 'piano');
@@ -251,7 +276,7 @@ modeToggleButton.onclick = () => {
 
 const resetButton = document.getElementById('reset-all');
 
-resetButton.onclick = () => {
+if(resetButton) resetButton.onclick = () => {
     IDEAS.forEach(i => i.div.remove());
     IDEAS = [];
 
@@ -279,8 +304,7 @@ function attachSelectionHandler(ideaObject) {
         ideaObject.div.classList.add('selected');
     });
 }
-
-canvas.addEventListener('mousedown', () => {
+if(canvas) canvas.addEventListener('mousedown', () => {
     if (selectedIdea) {
         selectedIdea.div.classList.remove('selected');
         selectedIdea = null;
@@ -294,7 +318,7 @@ const FONT_STEP = 2;
 const MIN_FONT = 10;
 const MAX_FONT = 40;
 
-biggerBtn.onclick = () => {
+if(biggerBtn) biggerBtn.onclick = () => {
     if (!selectedIdea) return;
 
     const current = parseInt(
@@ -306,7 +330,7 @@ biggerBtn.onclick = () => {
     saveToLocal();
 };
 
-smallerBtn.onclick = () => {
+if(smallerBtn) smallerBtn.onclick = () => {
     if (!selectedIdea) return;
 
     const current = parseInt(
@@ -358,8 +382,11 @@ function animate(currentTime) {
     requestAnimationFrame(animate);
 }
 
-loadFromLocal();
-requestAnimationFrame(animate);
+if(canvas) {
+    loadFromLocal();
+    requestAnimationFrame(animate);
+}
+
 
 // ===== 타이틀 자동 크기 조절 =====
 const titleInput = document.getElementById('title-input');
@@ -382,14 +409,16 @@ function adjustTitleWidth() {
     document.body.removeChild(temp);
 }
 
-const savedTitle = localStorage.getItem('canvas_title');
-if (savedTitle) {
-    titleInput.value = savedTitle;
-}
+if(titleInput) {
+    const savedTitle = localStorage.getItem('canvas_title');
+    if (savedTitle) {
+        titleInput.value = savedTitle;
+    }
 
-titleInput.addEventListener('input', () => {
-    localStorage.setItem('canvas_title', titleInput.value);
+    titleInput.addEventListener('input', () => {
+        localStorage.setItem('canvas_title', titleInput.value);
+        adjustTitleWidth();
+    });
+
     adjustTitleWidth();
-});
-
-adjustTitleWidth();
+}

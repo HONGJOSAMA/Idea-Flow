@@ -6,6 +6,7 @@
     --text-color: #1d1d1f;
     --accent-blue: #0071e3;
     --shadow: 0 8px 30px rgba(0,0,0,0.04);
+    --border-color: #d2d2d7;
 }
 
 body {
@@ -15,6 +16,7 @@ body {
     margin: 0;
     overflow: hidden;
     height: 100vh;
+    transition: margin-left 0.3s ease; /* Animate main content shift */
 }
 
 #canvas { position: absolute; width: 100%; height: 100%; }
@@ -205,4 +207,104 @@ body {
 #title-input:focus {
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.25);
+}
+
+/* Hamburger Menu */
+#menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 4000;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+}
+
+/* Side Menu */
+#side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background: #ffffff;
+    box-shadow: 0 0 40px rgba(0,0,0,0.1);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 3999;
+    padding-top: 80px;
+    border-right: 1px solid var(--border-color);
+}
+
+#side-menu.open {
+    transform: translateX(0);
+}
+
+#side-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#side-menu li a {
+    display: block;
+    padding: 15px 30px;
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+#side-menu li a:hover {
+    background-color: #f0f0f0;
+}
+
+/* Main content adjustment when menu is open */
+body.menu-open #title-bar,
+body.menu-open #input-bar,
+body.menu-open #trash-can {
+    transition: all 0.3s ease;
+}
+
+body.menu-open #title-bar {
+    transform: translateX(calc(-50% + 140px));
+}
+
+body.menu-open #input-bar {
+    transform: translateX(calc(-50% + 140px));
+}
+
+body.menu-open #trash-can {
+    transform: translateX(280px);
+}
+
+/* Generic Page Container for About, FAQ, etc. */
+.page-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.page-container h1, .page-container h3 {
+    color: var(--text-color);
+}
+
+.page-container p {
+    line-height: 1.7;
+    color: #555;
+}
+
+.page-container a {
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-weight: 500;
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,15 +7,29 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- 상단 중앙 제목 입력바 -->
-<div id="title-bar">
-    <input
-        type="text"
-        id="title-input"
-        placeholder="제목을 입력하세요"
-        autocomplete="off"
-    />
-</div>
+
+    <!-- Hamburger Menu -->
+    <button id="menu-toggle">☰</button>
+
+    <!-- Side Menu -->
+    <nav id="side-menu">
+        <ul>
+            <li><a href="about.html">ABOUT</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+        </ul>
+    </nav>
+
+    <!-- 상단 중앙 제목 입력바 -->
+    <div id="title-bar">
+        <input
+            type="text"
+            id="title-input"
+            placeholder="제목을 입력하세요"
+            autocomplete="off"
+        />
+    </div>
 
     <div id="canvas"></div>
     <div id="input-bar">
