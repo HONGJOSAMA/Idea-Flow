@@ -5,8 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Idea Canvas</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Apple-like Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+    :root {
+      --apple-bg: rgba(255,255,255,0.65);
+      --apple-border: rgba(0,0,0,0.12);
+      --apple-text: #111;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .header-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(20px);
+      background: var(--apple-bg);
+      border-bottom: 1px solid var(--apple-border);
+      z-index: 1000;
+    }
+
+    .dynamic-input-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--apple-border);
+      background: rgba(255,255,255,0.85);
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dynamic-input-wrapper:focus-within {
+      border-color: rgba(0,0,0,0.3);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .dynamic-input {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--apple-text);
+      background: transparent;
+      border: none;
+      outline: none;
+      min-width: 40px;
+      width: auto;
+      white-space: nowrap;
+    }
+
+    .input-mirror {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      visibility: hidden;
+      white-space: pre;
+      font-size: 15px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    </style>
 </head>
 <body>
+    <div class="header-bar">
+      <div class="dynamic-input-wrapper">
+        <input
+          id="headerTextInput"
+          class="dynamic-input"
+          type="text"
+          placeholder="텍스트 입력"
+          autocomplete="off"
+        />
+        <span id="inputMirror" class="input-mirror"></span>
+      </div>
+    </div>
     <div id="canvas"></div>
     <div id="input-bar">
         <button id="mode-toggle">Flow Mode</button> 
@@ -18,5 +98,19 @@
     </div>
     <div id="trash-can">🗑️</div>
     <script type="module" src="main.js"></script>
+    <script>
+    const input = document.getElementById('headerTextInput');
+    const mirror = document.getElementById('inputMirror');
+
+    function resizeInput() {
+      mirror.textContent = input.value || input.placeholder;
+      const width = mirror.offsetWidth + 4;
+      input.style.width = width + 'px';
+    }
+
+    input.addEventListener('input', resizeInput);
+    input.addEventListener('focus', resizeInput);
+    window.addEventListener('load', resizeInput);
+    </script>
 </body>
 </html>
