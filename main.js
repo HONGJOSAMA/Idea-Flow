@@ -6,6 +6,9 @@ const canvas = document.getElementById('canvas');
 const submitIdeaButton = document.getElementById('submit-idea');
 const trashCan = document.getElementById('trash-can'); // Reference to the trash can
 
+let currentMode = 'bounce'; // 'bounce' 또는 'piano'
+const modeToggleButton = document.getElementById('mode-toggle');
+
 let isDragging = false;
 let draggedIdea = null;
 let dragOffsetX = 0;
@@ -107,12 +110,34 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const ideasRef = ref(database, 'ideas'); // Reference to the 'ideas' path in your database
 
-const IDEAS = []; // Array to store all active idea objects
+    const IDEAS = []; // Array to store all active idea objects
 const IDEA_BASE_SPEED = 2; // Base speed for ideas
 const IDEA_SIZE = 50; // Approximate size of an idea for collision detection
 
-function renderIdeaFromFirebaseData(ideaData, firebaseKey) {
-    // Prevent duplicate rendering if idea already exists in IDEAS array
+// 아이디어 생성/렌더링 시 스타일 적용 함수
+function applyModeStyle(ideaObject) {
+    const { div } = ideaObject;
+    div.classList.remove('piano-white', 'piano-black');
+
+    if (currentMode === 'piano') {
+        // 50% 확률로 흑/백 결정
+        const isBlack = Math.random() > 0.5;
+        div.classList.add(isBlack ? 'piano-black' : 'piano-white');
+        
+        // 오른쪽에서 왼쪽으로 흐르도록 속도 고정 (음수 vx)
+        ideaObject.vx = -(Math.random() * 2 + 2); 
+        ideaObject.vy = 0; // 수평 이동
+        ideaObject.y = Math.random() * (canvas.offsetHeight - 100); // 무작위 높이 고정
+    } else {
+        // 기본 모드로 돌아올 때 속도 재부여
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = IDEA_BASE_SPEED + (Math.random() * 2);
+        ideaObject.vx = Math.cos(angle) * speed;
+        ideaObject.vy = Math.sin(angle) * speed;
+    }
+}
+
+function renderIdeaFromFirebaseData(ideaData, firebaseKey) {    // Prevent duplicate rendering if idea already exists in IDEAS array
     if (IDEAS.some(idea => idea.key === firebaseKey)) {
         return;
     }
@@ -141,6 +166,7 @@ function renderIdeaFromFirebaseData(ideaData, firebaseKey) {
         key: firebaseKey // Store Firebase key in the idea object
     };
     IDEAS.push(ideaObject);
+    applyModeStyle(ideaObject);
 }
 
 // Listen for new ideas added to Firebase
@@ -178,6 +204,16 @@ ideaInput.addEventListener('keydown', function(event) {
 
 submitIdeaButton.addEventListener('click', submitIdeaHandler);
 
+modeToggleButton.addEventListener('click', () => {
+    currentMode = currentMode === 'bounce' ? 'piano' : 'bounce';
+    modeToggleButton.textContent = currentMode === 'bounce' ? 'Switch to Piano Mode' : 'Switch to Bounce Mode';
+    
+    // 모드 변경 시 기존 아이디어들의 스타일과 속도 재설정
+    IDEAS.forEach(idea => {
+        applyModeStyle(idea);
+    });
+});
+
 function pushIdeaToFirebase(text) {
     // Generate random initial position (these will be stored but re-randomized on render)
     const x = Math.random() * (canvas.offsetWidth - IDEA_SIZE);
@@ -203,45 +239,56 @@ function pushIdeaToFirebase(text) {
 let lastTime = 0; // For calculating deltaTime
 
 function updateIdeaMovement(ideaObject, deltaTime) {
+    if (isDragging && draggedIdea === ideaObject) return; // 드래그 중엔 물리 연산 중지
+
     const ideaDiv = ideaObject.div;
     let { x, y, vx, vy } = ideaObject;
 
-    // Update position
-    x += vx * deltaTime * 0.01; // Scale velocity by deltaTime for frame-rate independence
+    x += vx * deltaTime * 0.01;
     y += vy * deltaTime * 0.01;
 
-    // Boundary collision detection
-    const divWidth = ideaDiv.offsetWidth;
-    const divHeight = ideaDiv.offsetHeight;
+    if (currentMode === 'piano') {
+        // Piano Mode: 왼쪽 끝으로 사라지면 오른쪽에서 다시 등장
+        if (x + ideaDiv.offsetWidth < 0) {
+            x = canvas.offsetWidth;
+            // 등장할 때 높이를 살짝 변경해 가독성 확보
+            y = Math.random() * (canvas.offsetHeight - 100);
+        }
+    } else {
+        // 기존 Bounce Mode 로직 (벽 튕기기)
+        const divWidth = ideaDiv.offsetWidth;
+        const divHeight = ideaDiv.offsetHeight;
 
-    // Right boundary
-    if (x + divWidth > canvas.offsetWidth) {
-        x = canvas.offsetWidth - divWidth;
-        vx *= -1; // Reverse horizontal velocity
-    }
-    // Left boundary
-    if (x < 0) {
-        x = 0;
-        vx *= -1; // Reverse horizontal velocity
-    }
-    // Bottom boundary
-    if (y + divHeight > canvas.offsetHeight) {
-        y = canvas.offsetHeight - divHeight;
-        vy *= -1; // Reverse vertical velocity
-    }
-    // Top boundary
-    if (y < 0) {
-        y = 0;
-        vy *= -1; // Reverse vertical velocity
+        // Right boundary
+        if (x + divWidth > canvas.offsetWidth) {
+            x = canvas.offsetWidth - divWidth;
+            vx *= -1; // Reverse horizontal velocity
+        }
+        // Left boundary
+        if (x < 0) {
+            x = 0;
+            vx *= -1; // Reverse horizontal velocity
+        }
+        // Bottom boundary
+        if (y + divHeight > canvas.offsetHeight) {
+            y = canvas.offsetHeight - divHeight;
+            vy *= -1; // Reverse vertical velocity
+        }
+        // Top boundary
+        if (y < 0) {
+            y = 0;
+            vy *= -1; // Reverse vertical velocity
+        }
+        
+        // 위치 보정 (화면 밖 탈출 방지)
+        x = Math.max(0, Math.min(x, canvas.offsetWidth - ideaDiv.offsetWidth));
+        y = Math.max(0, Math.min(y, canvas.offsetHeight - ideaDiv.offsetHeight));
     }
 
-    // Update the ideaObject's properties
     ideaObject.x = x;
     ideaObject.y = y;
     ideaObject.vx = vx;
     ideaObject.vy = vy;
-
-    // Apply updated position to the DOM element
     ideaDiv.style.transform = `translate(${x}px, ${y}px)`;
 }
 
