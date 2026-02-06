@@ -1,13 +1,26 @@
+/* Google Fonts - San Francisco 대체 */
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --bg-color: #f0f2f5; /* 아주 연한 회색 배경 */
+    --card-bg: #ffffff; /* 하얀색 카드 배경 */
+    --text-color: #333333; /* 진한 회색 텍스트 */
+    --accent-blue: #007aff; /* 애플 시그니처 파란색 */
+    --border-radius: 12px;
+    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08); /* 부드러운 그림자 */
+    --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.12); /* 호버 시 그림자 */
+}
+
 body {
-    background-color: #FFFDD0; /* Soft cream background */
-    color: #000; /* Default text color to black */
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    display: flex; /* Kept for overall centering, but will be managed by input-bar for bottom */
-    justify-content: center; /* Kept for overall centering */
-    align-items: center; /* Kept for overall centering */
-    height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif; /* 깔끔한 Sans-serif 폰트 */
     margin: 0;
     overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #canvas {
@@ -18,148 +31,151 @@ body {
     height: 100%;
 }
 
+/* 입력 바 디자인 */
 #input-bar {
     position: fixed;
-    bottom: 0;
+    bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
-    width: 100%;
-    max-width: 600px; /* Limit width for better appearance */
-    padding: 15px 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #FFFDD0; /* Cream background for the bar */
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.1); /* Subtle shadow at the top */
-    z-index: 1000; /* Ensure it's always on top */
-    gap: 10px; /* Space between input and button */
+    padding: 12px 15px;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    z-index: 1000;
+    gap: 10px;
 }
 
 #idea-input {
-    position: static; /* No longer relative, managed by parent flexbox */
-    z-index: auto;
-    padding: 15px 30px;
-    border-radius: 50px;
-    border: 2px solid #000; /* Black border */
-    background-color: #FFFDD0; /* Cream background */
-    color: #000; /* Black text */
-    font-size: 1.2em;
-    text-align: center;
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: none;
+    padding: 10px 15px;
+    font-size: 1rem;
+    font-weight: 500;
     outline: none;
-    transition: all 0.3s ease;
-    box-shadow: none; /* Clean shadow */
-    flex-grow: 1; /* Allow input to grow */
-    max-width: 400px;
+    width: 320px;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
 }
 
 #idea-input:focus {
-    border-color: #000; /* Still black on focus */
-    box-shadow: 0 0 10px rgba(0,0,0,0.2); /* Subtle black glow on focus */
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3); /* 파란색 포커스 링 */
 }
 
 #submit-idea {
-    position: static; /* No longer relative, managed by parent flexbox */
-    z-index: auto;
-    padding: 15px 30px;
-    border-radius: 50px;
-    border: 2px solid #000; /* Black border */
-    background-color: #000; /* Black background */
-    color: #FFFDD0; /* Cream text */
-    font-size: 1.2em;
+    background: var(--accent-blue);
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 8px;
     cursor: pointer;
-    outline: none;
-    transition: all 0.3s ease;
-    box-shadow: none; /* Clean shadow */
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 #submit-idea:hover {
-    background-color: #333; /* Slightly lighter black on hover */
-    border-color: #333;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3); /* Subtle black glow on hover */
+    background-color: #006ee6; /* 살짝 어두워지는 호버 */
+    box-shadow: var(--shadow-light);
 }
 
+/* 아이디어 카드 디자인 */
 .idea {
     position: absolute;
-    padding: 10px 20px;
-    background-color: #FFFDD0; /* Cream background */
-    color: #000; /* Black text */
-    border: 2px solid #000; /* Thick black border */
-    border-radius: 15px; /* Rounded rectangle */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle black shadow */
-    font-size: 1.1em;
-    text-align: center;
-    display: flex; /* Use flexbox for centering text */
-    justify-content: center;
-    align-items: center;
-    white-space: pre-wrap; /* Allows text to wrap and respects newlines if any */
-    word-break: break-word; /* Breaks long words */
-    max-width: 250px; /* Limit width for better readability */
-    box-sizing: border-box; /* Include padding in element's total width and height */
-}
-
-/* Piano Mode 전용 스타일 */
-.idea.piano-white {
-    background-color: #ffffff;
-    color: #000000;
-    border: 2px solid #000;
-}
-
-.idea.piano-black {
-    background-color: #000000;
-    color: #ffffff;
-    border: 2px solid #ffffff;
-}
-
-/* 모드 토글 버튼 디자인 */
-#mode-toggle {
     padding: 12px 20px;
-    border-radius: 50px;
-    border: 2px solid #000;
-    background-color: #f0f0f0; /* Flow Mode일 때 부드러운 회색 */
-    color: #000;
-    font-size: 0.9em;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    min-width: 140px;
-}
-
-#mode-toggle.active {
-    background-color: #000; /* Piano Mode일 때 검은색 */
-    color: #fff;
-    border-color: #000;
-}
-
-#mode-toggle:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-}
-
-#trash-can {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 70px;
-    height: 70px;
-    background: rgba(255, 253, 208, 0.8); /* Slightly transparent cream background */
-    border: 2px solid #000; /* Black border */
-    border-radius: 50%; /* Clean circle */
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid #e0e0e0; /* 연한 테두리 */
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    font-weight: 500;
+    font-size: 1.05rem;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.1s ease-out, box-shadow 0.2s ease-in-out;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-width: 250px;
+    min-width: 80px; /* 너무 작아지지 않게 */
+    text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2.2em;
-    color: #000; /* Black icon */
+}
+
+.idea:active {
+    cursor: grabbing;
+    transform: scale(1.02); /* 드래그 시 살짝 커짐 */
+    box-shadow: var(--shadow-hover);
+}
+
+/* Piano Mode 전용 - 애플의 다크 모드/라이트 모드 느낌으로 */
+.idea.piano-white {
+    background: #ffffff;
+    color: var(--text-color);
+    border-color: #e0e0e0;
+}
+
+.idea.piano-black {
+    background: #333333; /* 다크 모드 카드 배경 */
+    color: #ffffff;
+    border-color: #444444;
+}
+
+/* 모드 버튼 */
+#mode-toggle {
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: none;
+    padding: 10px 18px;
+    font-weight: 500;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    min-width: 110px; /* 텍스트 길이에 맞춤 */
+}
+
+#mode-toggle.active {
+    background: var(--accent-blue);
+    color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3);
+}
+
+#mode-toggle:hover {
+    background-color: #e0e0e0; /* 호버 시 살짝 어두워짐 */
+}
+
+#mode-toggle.active:hover {
+    background-color: #006ee6;
+}
+
+
+/* 쓰레기통 */
+#trash-can {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: var(--card-bg);
+    border: 1px solid #e0e0e0;
+    color: #888888; /* 연한 회색 아이콘 */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
     cursor: default;
     z-index: 100;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Subtle black shadow */
-    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+    transition: all 0.2s ease-in-out;
 }
 
 #trash-can.trash-can-hover {
-    transform: scale(1.1); /* Subtle enlargement on hover */
-    box-shadow: 0 0 20px rgba(0,0,0,0.2); /* Slightly more prominent shadow on hover */
-    border-color: #000;
-    /* No animation for hover, just a smooth transition */
+    background: #ff3b30; /* 애플 레드로 변경 */
+    color: #ffffff;
+    transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(255, 59, 48, 0.4);
 }
-
-
