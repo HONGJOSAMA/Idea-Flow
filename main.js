@@ -71,7 +71,6 @@ function createIdeaElement(text, savedData = null) {
     }
 
     ideaDiv.addEventListener('mousedown', (e) => onMouseDown(e, ideaObject));
-    attachSelectionHandler(ideaObject); // 아이디어 생성 시 선택 핸들러 부착
     IDEAS.push(ideaObject);
 }
 
@@ -81,6 +80,15 @@ let draggedIdea = null;
 
 function onMouseDown(e, ideaObj) {
     if (e.button !== 0) return;
+
+    // ✅ 선택 처리 (드래그보다 먼저)
+    if (selectedIdea && selectedIdea !== ideaObj) {
+        selectedIdea.div.classList.remove('selected');
+    }
+
+    selectedIdea = ideaObj;
+    ideaObj.div.classList.add('selected');
+
     e.stopPropagation(); // 이벤트 전파 방지
 
     isDragging = true;
@@ -227,7 +235,7 @@ function attachSelectionHandler(ideaObject) {
 }
 
 // 캔버스 클릭 → 선택 해제
-canvas.addEventListener('click', () => {
+canvas.addEventListener('mousedown', () => {
     if (selectedIdea) {
         selectedIdea.div.classList.remove('selected');
         selectedIdea = null;
