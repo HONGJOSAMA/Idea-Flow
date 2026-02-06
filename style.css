@@ -92,13 +92,15 @@ body {
 }
 
 .dark-mode .idea {
-    border-color: rgba(255, 235, 59, 0.1);
+    border: 1px solid rgba(255, 238, 140, 0.6);
+    box-shadow: 0 0 3px rgba(255, 238, 140, 0.4), 0 0 6px rgba(249, 215, 28, 0.3);
 }
 
 .dark-mode .idea.selected {
-    border: 1px solid #FFEE8C;
-    box-shadow: 0 0 5px #FFEE8C, 0 0 10px #FFEE8C, 0 0 15px #F9D71C;
+    border: 1px solid rgba(255, 247, 0, 0.8);
+    box-shadow: 0 0 5px rgba(255, 247, 0, 0.6), 0 0 10px rgba(249, 215, 28, 0.5);
 }
+
 
 .idea:active { cursor: grabbing; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
 
