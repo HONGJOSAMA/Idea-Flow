@@ -2,7 +2,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menu-toggle');
     const sideMenu = document.getElementById('side-menu');
     const mainContent = document.getElementById('main-content');
+    const darkModeToggleButton = document.getElementById('dark-mode-toggle');
 
+    // Dark Mode Logic
+    const applyDarkMode = (isDark) => {
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            if(darkModeToggleButton) darkModeToggleButton.textContent = '☀️';
+        } else {
+            document.body.classList.remove('dark-mode');
+            if(darkModeToggleButton) darkModeToggleButton.textContent = '🌙';
+        }
+    };
+
+    if (darkModeToggleButton) {
+        darkModeToggleButton.addEventListener('click', () => {
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            applyDarkMode(!isDarkMode);
+            localStorage.setItem('darkMode', !isDarkMode);
+        });
+    }
+
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    applyDarkMode(savedDarkMode);
+
+
+    // Menu Logic
     if (menuToggle && sideMenu) {
         menuToggle.addEventListener('click', () => {
             sideMenu.classList.toggle('open');
@@ -10,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Close menu when clicking on main content
     if(mainContent) {
         mainContent.addEventListener('click', () => {
             if (sideMenu.classList.contains('open')) {

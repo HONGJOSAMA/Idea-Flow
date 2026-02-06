@@ -1,12 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
 :root {
-    --bg-color: #f5f5f7; /* Apple 상징 배경색 */
+    --bg-color: #f5f5f7;
     --card-bg: rgba(255, 255, 255, 0.8);
     --text-color: #1d1d1f;
     --accent-blue: #0071e3;
     --shadow: 0 8px 30px rgba(0,0,0,0.04);
     --border-color: #d2d2d7;
+}
+
+.dark-mode {
+    --bg-color: #000000;
+    --card-bg: rgba(29, 29, 31, 0.75);
+    --text-color: #f5f5f7;
+    --border-color: #333333;
+    --shadow: 0 8px 30px rgba(0,0,0,0.2);
+
 }
 
 body {
@@ -16,12 +25,11 @@ body {
     margin: 0;
     overflow: hidden;
     height: 100vh;
-    transition: margin-left 0.3s ease; /* Animate main content shift */
+    transition: margin-left 0.3s ease, background-color 0.3s, color 0.3s; 
 }
 
 #canvas { position: absolute; width: 100%; height: 100%; }
 
-/* 미니멀한 입력 바 */
 #input-bar {
     position: fixed;
     bottom: 40px;
@@ -29,14 +37,15 @@ body {
     transform: translateX(-50%);
     display: flex;
     padding: 8px;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(20px); /* 유리 질감 */
+    background: var(--card-bg);
+    backdrop-filter: blur(20px); 
     -webkit-backdrop-filter: blur(20px);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
     z-index: 2000;
     gap: 8px;
+    transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
 #idea-input {
@@ -50,7 +59,7 @@ body {
 }
 
 #idea-input:focus {
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3); /* 파란색 포커스 링 */
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3); 
 }
 
 #submit-idea {
@@ -66,7 +75,6 @@ body {
 
 #submit-idea:hover { transform: scale(1.02); opacity: 0.9; }
 
-/* Apple 카드 스타일의 아이디어 */
 .idea {
     position: absolute;
     padding: 16px 24px;
@@ -74,18 +82,26 @@ body {
     backdrop-filter: blur(10px);
     border-radius: 18px;
     box-shadow: var(--shadow);
-    border: 1px solid rgba(255,255,255,0.5);
+    border: 1px solid var(--border-color);
     font-size: 15px;
     font-weight: 500;
     cursor: grab;
-    transition: box-shadow 0.3s, transform 0.1s;
+    transition: box-shadow 0.3s, transform 0.1s, background-color 0.3s, border-color 0.3s, color 0.3s;
     user-select: none;
     text-align: center;
 }
 
+.dark-mode .idea {
+    border-color: rgba(255, 235, 59, 0.1);
+}
+
+.dark-mode .idea.selected {
+    border: 1px solid #FFEE8C;
+    box-shadow: 0 0 5px #FFEE8C, 0 0 10px #FFEE8C, 0 0 15px #F9D71C;
+}
+
 .idea:active { cursor: grabbing; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
 
-/* 모드 스타일 */
 .idea.piano-black { background: rgba(29, 29, 31, 0.9); color: white; border: none; }
 .idea.piano-white { background: rgba(255, 255, 255, 0.9); color: #1d1d1f; }
 
@@ -100,14 +116,13 @@ body {
 
 #mode-toggle.active { background: var(--text-color); color: white; }
 
-/* 쓰레기통 */
 #trash-can {
     position: fixed;
     top: 40px;
     right: 40px;
     width: 60px;
     height: 60px;
-    background: white;
+    background: var(--card-bg);
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -118,19 +133,17 @@ body {
 }
 
 #trash-can.trash-can-hover {
-    background: #ff3b30; /* Apple Red */
+    background: #ff3b30;
     transform: scale(1.2);
     color: white;
 }
 
-/* 선택된 아이디어 표시 (Word 느낌) */
 .idea.selected {
     box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.4);
 }
 
-/* 글자 크기 버튼 */
 #font-smaller,
-#font-bigger {
+#font-bigger, #dark-mode-toggle {
     background: rgba(0,0,0,0.05);
     border: none;
     width: 44px;
@@ -141,13 +154,27 @@ body {
     transition: all 0.2s;
 }
 
+.dark-mode #font-smaller, 
+.dark-mode #font-bigger, 
+.dark-mode #dark-mode-toggle {
+    background: rgba(255,255,255,0.1);
+    color: #f5f5f7;
+}
+
 #font-smaller:hover,
-#font-bigger:hover {
+#font-bigger:hover, 
+#dark-mode-toggle:hover {
     background: rgba(0,0,0,0.12);
 }
 
+.dark-mode #font-smaller:hover,
+.dark-mode #font-bigger:hover, 
+.dark-mode #dark-mode-toggle:hover {
+    background: rgba(255,255,255,0.2);
+}
+
 #reset-all {
-    background: rgba(255, 59, 48, 0.1); /* Apple Red 연하게 */
+    background: rgba(255, 59, 48, 0.1);
     border: none;
     padding: 0 16px;
     border-radius: 14px;
@@ -162,60 +189,52 @@ body {
     color: white;
     transform: scale(1.05);
 }
-/* ===== 상단 제목 입력 바 ===== */
+
 #title-bar {
     position: fixed;
     top: 18px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 3000;
-
-    /* 배경 제거 → 인풋만 보이게 */
     pointer-events: none;
 }
 
-/* 실제 입력창 */
 #title-input {
     pointer-events: auto;
-
-    background: rgba(255, 255, 255, 0.75);
+    background: var(--card-bg);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-
-    border: 1px solid rgba(0,0,0,0.12);
+    border: 1px solid var(--border-color);
     border-radius: 999px;
-
     padding: 10px 22px;
-    
-    /* ✅ 자동 크기 조절 */
     width: auto;
     min-width: 160px;
     max-width: 520px;
-
     font-size: 20px;
     font-weight: 600;
     text-align: center;
     color: var(--text-color);
-
     outline: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-    
-    /* ✅ 부드러운 크기 변화 애니메이션 */
-    transition: width 0.2s ease;
+    box-shadow: var(--shadow);
+    transition: width 0.2s ease, background-color 0.3s, border-color 0.3s, color 0.3s;
 }
-/* 포커스 시 Apple 스타일 */
+
 #title-input:focus {
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.25);
 }
 
-/* Hamburger Menu */
+.dark-mode #title-input:focus {
+    border-color: rgba(255, 235, 59, 0.8);
+    box-shadow: 0 0 0 4px rgba(255, 235, 59, 0.3);
+}
+
 #menu-toggle {
     position: fixed;
     top: 20px;
     left: 20px;
     z-index: 4000;
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 50%;
     width: 50px;
@@ -224,22 +243,26 @@ body {
     cursor: pointer;
     box-shadow: var(--shadow);
     backdrop-filter: blur(10px);
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
-/* Side Menu */
 #side-menu {
     position: fixed;
     top: 0;
     left: 0;
     width: 280px;
     height: 100%;
-    background: #ffffff;
+    background: var(--bg-color);
     box-shadow: 0 0 40px rgba(0,0,0,0.1);
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, background-color 0.3s;
     z-index: 3999;
     padding-top: 80px;
     border-right: 1px solid var(--border-color);
+}
+
+.dark-mode #side-menu { 
+    background: #111111; 
 }
 
 #side-menu.open {
@@ -262,10 +285,13 @@ body {
 }
 
 #side-menu li a:hover {
-    background-color: #f0f0f0;
+    background-color: rgba(255,255,255,0.05);
 }
 
-/* Main content adjustment when menu is open */
+.dark-mode #side-menu li a:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
 body.menu-open #title-bar,
 body.menu-open #input-bar,
 body.menu-open #trash-can {
@@ -284,12 +310,11 @@ body.menu-open #trash-can {
     transform: translateX(280px);
 }
 
-/* Generic Page Container for About, FAQ, etc. */
 .page-container {
     max-width: 800px;
     margin: 40px auto;
     padding: 20px;
-    background: #fff;
+    background: var(--bg-color);
     border-radius: 12px;
     box-shadow: var(--shadow);
 }
@@ -300,7 +325,8 @@ body.menu-open #trash-can {
 
 .page-container p {
     line-height: 1.7;
-    color: #555;
+    color: var(--text-color);
+    opacity: 0.8;
 }
 
 .page-container a {
