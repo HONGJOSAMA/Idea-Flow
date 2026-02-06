@@ -148,7 +148,17 @@ function updateIdeaMovement(ideaObject, deltaTime) {
     const h = div.offsetHeight;
 
     if (currentMode === 'piano') {
-        if (x + w < 0) { x = canvas.offsetWidth; y = Math.random() * (canvas.offsetHeight - h); }
+        // ⬅️ 왼쪽으로 완전히 벗어나면
+        if (x + w < 0) {
+            // 👉 오른쪽 바깥에서 자연스럽게 다시 등장
+            x = canvas.offsetWidth + w;
+
+            // 🎨 다시 등장할 때 흑 / 백 랜덤 적용
+            div.classList.remove('piano-white', 'piano-black');
+            div.classList.add(
+                Math.random() > 0.5 ? 'piano-black' : 'piano-white'
+            );
+        }
     } else {
         if (x + w > canvas.offsetWidth || x < 0) { vx *= -0.7; x = x < 0 ? 0 : canvas.offsetWidth - w; }
         if (y + h > canvas.offsetHeight || y < 0) { vy *= -0.7; y = y < 0 ? 0 : canvas.offsetHeight - h; }
@@ -167,9 +177,15 @@ function isOverTrashCan(div, trash) {
 
 function applyModeStyle(idea) {
     idea.div.classList.remove('piano-white', 'piano-black');
+
     if (currentMode === 'piano') {
-        idea.div.classList.add(Math.random() > 0.5 ? 'piano-black' : 'piano-white');
-        idea.vx = -(1.5 + Math.random());
+        // 🎨 랜덤 흑 / 백
+        idea.div.classList.add(
+            Math.random() > 0.5 ? 'piano-black' : 'piano-white'
+        );
+
+        // ⬅️ 왼쪽으로 일정 속도로 이동
+        idea.vx = -(1.2 + Math.random() * 0.8);
         idea.vy = 0;
     } else {
         const angle = Math.random() * 2 * Math.PI;
