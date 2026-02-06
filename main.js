@@ -9,6 +9,8 @@ let IDEAS = []; // const 대신 let으로 변경 (초기화 용이성)
 const IDEA_BASE_SPEED = 1.5; // 애플스러운 부드러운 속도
 let lastTime = 0;
 
+let isComposing = false; // IME 구성 상태 추적
+
 // 1. 로컬 저장소 로직
 function saveToLocal() {
     const data = IDEAS.map(i => ({
@@ -173,7 +175,20 @@ const submitAction = (e) => {
 };
 
 submitIdeaButton.onclick = submitAction;
-ideaInput.onkeydown = (e) => { if (e.key === 'Enter') submitAction(e); };
+
+ideaInput.addEventListener('compositionstart', () => {
+    isComposing = true;
+});
+
+ideaInput.addEventListener('compositionend', () => {
+    isComposing = false;
+});
+
+ideaInput.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter' && !isComposing) {
+        submitAction(e);
+    }
+});
 
 modeToggleButton.onclick = () => {
     currentMode = currentMode === 'bounce' ? 'piano' : 'bounce';
