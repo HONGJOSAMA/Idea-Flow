@@ -110,18 +110,29 @@ body {
     border: 2px solid #ffffff;
 }
 
-/* 모드 전환 버튼 스타일 (HTML에 추가할 것) */
+/* 모드 토글 버튼 디자인 */
 #mode-toggle {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    padding: 10px 20px;
-    background: #000;
-    color: #FFFDD0;
-    border: 2px solid #000;
+    padding: 15px 20px;
     border-radius: 50px;
+    border: 2px solid #000;
+    background-color: #fff; /* 기본 하얀색 */
+    color: #000;
+    font-weight: bold;
     cursor: pointer;
-    z-index: 1001;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+/* 피아노 모드가 켜졌을 때의 버튼 스타일 */
+#mode-toggle.active {
+    background-color: #000;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+#mode-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
 }
 
 #trash-can {

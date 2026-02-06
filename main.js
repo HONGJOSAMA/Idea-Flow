@@ -206,9 +206,17 @@ submitIdeaButton.addEventListener('click', submitIdeaHandler);
 
 modeToggleButton.addEventListener('click', () => {
     currentMode = currentMode === 'bounce' ? 'piano' : 'bounce';
-    modeToggleButton.textContent = currentMode === 'bounce' ? 'Switch to Piano Mode' : 'Switch to Bounce Mode';
     
-    // 모드 변경 시 기존 아이디어들의 스타일과 속도 재설정
+    // 버튼 상태 및 텍스트 변경
+    if (currentMode === 'piano') {
+        modeToggleButton.textContent = 'Piano Mode ON';
+        modeToggleButton.classList.add('active');
+    } else {
+        modeToggleButton.textContent = 'Piano Mode OFF';
+        modeToggleButton.classList.remove('active');
+    }
+    
+    // 기존 아이디어들 즉시 모드 변경 적용
     IDEAS.forEach(idea => {
         applyModeStyle(idea);
     });
