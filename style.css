@@ -112,22 +112,22 @@ body {
 
 /* 모드 토글 버튼 디자인 */
 #mode-toggle {
-    padding: 15px 20px;
+    padding: 12px 20px;
     border-radius: 50px;
     border: 2px solid #000;
-    background-color: #fff; /* 기본 하얀색 */
+    background-color: #f0f0f0; /* Flow Mode일 때 부드러운 회색 */
     color: #000;
-    font-weight: bold;
+    font-size: 0.9em;
+    font-weight: 800;
     cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    min-width: 120px;
 }
 
-/* 피아노 모드가 켜졌을 때의 버튼 스타일 */
 #mode-toggle.active {
-    background-color: #000;
+    background-color: #000; /* Piano Mode일 때 검은색 */
     color: #fff;
-    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    border-color: #000;
 }
 
 #mode-toggle:hover {

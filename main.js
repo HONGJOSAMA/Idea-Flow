@@ -207,41 +207,29 @@ submitIdeaButton.addEventListener('click', submitIdeaHandler);
 modeToggleButton.addEventListener('click', () => {
     currentMode = currentMode === 'bounce' ? 'piano' : 'bounce';
     
-    // 버튼 상태 및 텍스트 변경
     if (currentMode === 'piano') {
-        modeToggleButton.textContent = 'Piano Mode ON';
+        modeToggleButton.textContent = 'Piano Mode';
         modeToggleButton.classList.add('active');
     } else {
-        modeToggleButton.textContent = 'Piano Mode OFF';
+        modeToggleButton.textContent = 'Flow Mode'; // 버튼 이름 변경
         modeToggleButton.classList.remove('active');
     }
     
-    // 기존 아이디어들 즉시 모드 변경 적용
-    IDEAS.forEach(idea => {
-        applyModeStyle(idea);
-    });
+    IDEAS.forEach(idea => applyModeStyle(idea));
 });
 
 function pushIdeaToFirebase(text) {
-    // Generate random initial position (these will be stored but re-randomized on render)
-    const x = Math.random() * (canvas.offsetWidth - IDEA_SIZE);
-    const y = Math.random() * (canvas.offsetHeight - IDEA_SIZE);
-    
-    // Set random velocity
-    const angle = Math.random() * 2 * Math.PI; // Random angle in radians
-    const speed = IDEA_BASE_SPEED + (Math.random() * 2); // Random speed between IDEA_BASE_SPEED and IDEA_BASE_SPEED + 2
-    const vx = Math.cos(angle) * speed;
-    const vy = Math.sin(angle) * speed;
+    const angle = Math.random() * 2 * Math.PI;
+    const speed = IDEA_BASE_SPEED + (Math.random() * 2);
     
     const ideaData = {
         text: text,
-        x: x, // Stored, but will be re-randomized on render
-        y: y, // Stored, but will be re-randomized on render
-        vx: vx,
-        vy: vy
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed
     };
 
-    push(ideasRef, ideaData); // Push data to Firebase
+    push(ideasRef, ideaData); 
+    // 여기서 직접 렌더링하지 않습니다. onChildAdded가 대신 처리합니다.
 }
 
 let lastTime = 0; // For calculating deltaTime
@@ -300,10 +288,46 @@ function updateIdeaMovement(ideaObject, deltaTime) {
     ideaDiv.style.transform = `translate(${x}px, ${y}px)`;
 }
 
+// 아이디어 간 충돌 감지 함수
+function checkIdeaCollisions() {
+    for (let i = 0; i < IDEAS.length; i++) {
+        for (let j = i + 1; j < IDEAS.length; j++) {
+            const a = IDEAS[i];
+            const b = IDEAS[j];
+
+            const rectA = a.div.getBoundingClientRect();
+            const rectB = b.div.getBoundingClientRect();
+
+            // 사각형 충돌 판정
+            if (rectA.left < rectB.right &&
+                rectA.right > rectB.left &&
+                rectA.top < rectB.bottom &&
+                rectA.bottom > rectB.top) {
+                
+                // 부딪히면 속도 교환 (튕기는 효과)
+                const tempVx = a.vx;
+                const tempVy = a.vy;
+                a.vx = b.vx;
+                a.vy = b.vy;
+                b.vx = tempVx;
+                b.vy = tempVy;
+
+                // 겹침 방지를 위해 살짝 밀어냄
+                a.x += a.vx * 2;
+                a.y += a.vy * 2;
+            }
+        }
+    }
+}
+
 function update(deltaTime) {
     // This function can be extended later to handle different movement modes
     for (let i = 0; i < IDEAS.length; i++) {
         updateIdeaMovement(IDEAS[i], deltaTime);
+    }
+    // Bounce 모드일 때만 서로 충돌하게 함
+    if (currentMode === 'bounce') {
+        checkIdeaCollisions();
     }
 }
 
