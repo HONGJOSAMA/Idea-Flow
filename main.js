@@ -137,6 +137,7 @@ function onMouseDown(e, ideaObj) {
 }
 
 // 4. 물리 및 경계 처리
+// 4. 물리 및 경계 처리
 function updateIdeaMovement(ideaObject, deltaTime) {
     if (isDragging && draggedIdea === ideaObject) return;
     
@@ -150,6 +151,9 @@ function updateIdeaMovement(ideaObject, deltaTime) {
     if (currentMode === 'piano') {
         // ⬅️ 왼쪽으로 완전히 벗어나면
         if (x + w < 0) {
+            // 🚫 잠시 숨김
+            div.style.opacity = '0';
+            
             // 👉 오른쪽 완전 바깥으로 이동 (화면 밖에서 텔레포트)
             x = canvas.offsetWidth + w + 50; // ✅ 요소 너비 + 여유 공간
             // 🎲 Y 위치도 랜덤하게 변경
@@ -160,6 +164,16 @@ function updateIdeaMovement(ideaObject, deltaTime) {
             div.classList.add(
                 Math.random() > 0.5 ? 'piano-black' : 'piano-white'
             );
+            
+            // ✅ 위치 즉시 적용 (숨긴 상태에서)
+            div.style.transform = `translate(${x}px, ${y}px)`;
+            
+            // 🎬 다음 프레임에서 다시 보이게
+            requestAnimationFrame(() => {
+                div.style.opacity = '1';
+            });
+            
+            return; // 이번 프레임은 여기서 종료
         }
         
         // 🔝🔽 위아래 경계 처리 (바운스 없이 고정)
