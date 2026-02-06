@@ -133,7 +133,7 @@ function onMouseDown(e, ideaObj) {
     };
 
     document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mouseup', onMouseup);
 }
 
 // 4. 물리 및 경계 처리
@@ -373,3 +373,36 @@ function animate(currentTime) {
 // 시작
 loadFromLocal();
 requestAnimationFrame(animate);
+
+const headerInput = document.getElementById("headerTextInput");
+const mirror = document.getElementById("inputMirror");
+const plusBtn = document.getElementById("headerFontPlus");
+const minusBtn = document.getElementById("headerFontMinus");
+
+let headerFontSize = 20;
+
+/* 입력 길이에 맞게 width 자동 조절 */
+function updateInputWidth() {
+    mirror.textContent = headerInput.value || headerInput.placeholder;
+    headerInput.style.width = mirror.offsetWidth + 4 + "px";
+}
+
+headerInput.addEventListener("input", updateInputWidth);
+
+/* 폰트 크기 조절 */
+plusBtn.onclick = () => {
+    headerFontSize += 2;
+    headerInput.style.fontSize = headerFontSize + "px";
+    mirror.style.fontSize = headerFontSize + "px";
+    updateInputWidth();
+};
+
+minusBtn.onclick = () => {
+    headerFontSize = Math.max(12, headerFontSize - 2);
+    headerInput.style.fontSize = headerFontSize + "px";
+    mirror.style.fontSize = headerFontSize + "px";
+    updateInputWidth();
+};
+
+/* 초기 실행 */
+updateInputWidth();
