@@ -5,11 +5,11 @@ const modeToggleButton = document.getElementById('mode-toggle');
 const trashCan = document.getElementById('trash-can');
 
 let currentMode = 'bounce';
-const IDEAS = [];
+let IDEAS = []; // const 대신 let으로 변경 (초기화 용이성)
 const IDEA_BASE_SPEED = 2;
 let lastTime = 0;
 
-// 1. 로컬 저장소 로직 (개인 전용)
+// 1. 로컬 저장소 로직
 function saveToLocal() {
     const data = IDEAS.map(i => ({
         text: i.div.textContent,
@@ -17,33 +17,27 @@ function saveToLocal() {
         y: i.y,
         vx: i.vx,
         vy: i.vy,
-        // 현재 모드 스타일을 저장하여 불러올 때 유지되도록 함
-        currentModeClass: Array.from(i.div.classList).filter(c => c.startsWith('piano-')).join(' ')
+        modeClass: Array.from(i.div.classList).filter(c => c.startsWith('piano-')).join(' ')
     }));
-    localStorage.setItem('my_private_ideas', JSON.stringify(data));
+    localStorage.setItem('apple_ideas_v2', JSON.stringify(data));
 }
 
 function loadFromLocal() {
-    const saved = localStorage.getItem('my_private_ideas');
+    const saved = localStorage.getItem('apple_ideas_v2');
     if (saved) {
-        JSON.parse(saved).forEach(item => {
-            // 불러올 때는 savedData를 전달하여 기본 속도/위치 사용
+        // [중요] 중복 방지: 로드 전 캔버스와 배열을 완전히 비웁니다.
+        canvas.innerHTML = ''; 
+        IDEAS = []; 
+        
+        const data = JSON.parse(saved);
+        data.forEach(item => {
             createIdeaElement(item.text, item);
         });
     }
 }
 
-// 2. 아이디어 생성 통합 함수 (중복 차단의 핵심 개선)
+// 2. 아이디어 생성 함수
 function createIdeaElement(text, savedData = null) {
-    // 이미 생성된 아이디어인지 확인 (동일한 텍스트로)
-    // 이 로직은 `loadFromLocal`에서 중복 방지에 필요하지만,
-    // input 처리 시에는 중복 입력 방지를 위한 `trim()`과 `if (text)`로 충분함.
-    // 여기서는 `savedData`가 있는 경우에만 중복 체크하여 로드 시 문제가 없도록 함.
-    if (savedData && IDEAS.some(idea => idea.x === savedData.x && idea.y === savedData.y && idea.div.textContent === text)) {
-        return; // 이미 존재하는 아이디어는 다시 생성하지 않음
-    }
-
-
     const ideaDiv = document.createElement('div');
     ideaDiv.classList.add('idea');
     ideaDiv.textContent = text;
@@ -54,33 +48,27 @@ function createIdeaElement(text, savedData = null) {
 
     const ideaObject = {
         div: ideaDiv,
-        // 저장된 데이터가 있으면 해당 위치/속도 사용, 없으면 랜덤 생성
-        x: savedData?.x ?? Math.random() * (canvas.offsetWidth - 150),
-        y: savedData?.y ?? Math.random() * (canvas.offsetHeight - 150),
-        vx: savedData?.vx ?? Math.cos(angle) * speed,
-        vy: savedData?.vy ?? Math.sin(angle) * speed,
-        lastMouseX: 0,
-        lastMouseY: 0
+        // savedData가 있으면 정확히 그 위치에, 없으면 랜덤 위치에 생성
+        x: savedData ? savedData.x : Math.random() * (canvas.offsetWidth - 150),
+        y: savedData ? savedData.y : Math.random() * (canvas.offsetHeight - 150),
+        vx: savedData ? savedData.vx : Math.cos(angle) * speed,
+        vy: savedData ? savedData.vy : Math.sin(angle) * speed,
     };
     
-    // 불러온 데이터에 저장된 모드 클래스가 있다면 적용
-    if (savedData?.currentModeClass) {
-        savedData.currentModeClass.split(' ').forEach(cls => {
-            if (cls) ideaDiv.classList.add(cls);
-        });
+    // 저장된 스타일 복구
+    if (savedData && savedData.modeClass) {
+        ideaDiv.className = `idea ${savedData.modeClass}`;
     } else {
-        // 새로 생성된 아이디어에만 현재 모드 스타일 적용
         applyModeStyle(ideaObject);
     }
     
-    // 초기 위치 적용
     ideaDiv.style.transform = `translate(${ideaObject.x}px, ${ideaObject.y}px)`;
-
     ideaDiv.addEventListener('mousedown', (e) => onMouseDown(e, ideaObject));
+    
     IDEAS.push(ideaObject);
 }
 
-// 3. 드래그 및 관성 물리 (이전 코드와 동일, 잘 작동하므로 유지)
+// 3. 드래그 로직 (중간 생략 없이 견고하게 유지)
 let isDragging = false;
 let draggedIdea = null;
 
@@ -88,22 +76,23 @@ function onMouseDown(e, ideaObj) {
     if (e.button !== 0) return;
     isDragging = true;
     draggedIdea = ideaObj;
-    draggedIdea.lastMouseX = e.clientX;
-    draggedIdea.lastMouseY = e.clientY;
+    let lastMouseX = e.clientX;
+    let lastMouseY = e.clientY;
+    
     draggedIdea.div.style.cursor = 'grabbing';
     draggedIdea.vx = 0;
     draggedIdea.vy = 0;
 
     const onMouseMove = (mE) => {
         if (!isDragging || !draggedIdea) return;
-        const dx = mE.clientX - draggedIdea.lastMouseX;
-        const dy = mE.clientY - draggedIdea.lastMouseY;
+        const dx = mE.clientX - lastMouseX;
+        const dy = mE.clientY - lastMouseY;
         draggedIdea.x += dx;
         draggedIdea.y += dy;
-        draggedIdea.vx = dx * 0.5;
-        draggedIdea.vy = dy * 0.5;
-        draggedIdea.lastMouseX = mE.clientX;
-        draggedIdea.lastMouseY = mE.clientY;
+        draggedIdea.vx = dx * 0.4; // 관성 계수
+        draggedIdea.vy = dy * 0.4;
+        lastMouseX = mE.clientX;
+        lastMouseY = mE.clientY;
         draggedIdea.div.style.transform = `translate(${draggedIdea.x}px, ${draggedIdea.y}px)`;
         
         if (isOverTrashCan(draggedIdea.div, trashCan)) trashCan.classList.add('trash-can-hover');
@@ -116,7 +105,7 @@ function onMouseDown(e, ideaObj) {
             draggedIdea.div.style.cursor = 'grab';
             if (isOverTrashCan(draggedIdea.div, trashCan)) {
                 draggedIdea.div.remove();
-                IDEAS.splice(IDEAS.indexOf(draggedIdea), 1);
+                IDEAS = IDEAS.filter(i => i !== draggedIdea);
             }
             saveToLocal();
         }
@@ -129,19 +118,13 @@ function onMouseDown(e, ideaObj) {
     document.addEventListener('mouseup', onMouseUp);
 }
 
-// 4. 벽 충돌 및 서로 충돌 로직 (이전 코드와 동일, 잘 작동하므로 유지)
+// 4. 물리 연산
 function updateIdeaMovement(ideaObject, deltaTime) {
     if (isDragging && draggedIdea === ideaObject) return;
+    
     let { x, y, vx, vy, div } = ideaObject;
     x += vx * deltaTime * 0.01;
     y += vy * deltaTime * 0.01;
-
-    // 화면 밖으로 나가지 않도록 경계 조건 강화 (넉넉하게 설정)
-    const padding = 10; // 벽에서 살짝 안쪽으로 튕기게
-    const minX = -div.offsetWidth / 2; // 아이디어 절반까지는 나갈 수 있도록
-    const maxX = canvas.offsetWidth - div.offsetWidth / 2;
-    const minY = 0;
-    const maxY = canvas.offsetHeight - div.offsetHeight;
 
     if (currentMode === 'piano') {
         if (x + div.offsetWidth < 0) {
@@ -149,12 +132,15 @@ function updateIdeaMovement(ideaObject, deltaTime) {
             y = Math.random() * (canvas.offsetHeight - 100);
         }
     } else {
-        if (x + div.offsetWidth > canvas.offsetWidth - padding || x < padding) vx *= -1;
-        if (y + div.offsetHeight > canvas.offsetHeight - padding || y < padding) vy *= -1;
-
-        // 경계 보정
-        x = Math.max(minX, Math.min(x, maxX));
-        y = Math.max(minY, Math.min(y, maxY));
+        // 벽 튕기기 로직 (애플 스타일의 부드러운 튕김)
+        if (x + div.offsetWidth > canvas.offsetWidth || x < 0) {
+            vx *= -0.8; // 반발 계수 적용
+            x = x < 0 ? 0 : canvas.offsetWidth - div.offsetWidth;
+        }
+        if (y + div.offsetHeight > canvas.offsetHeight || y < 0) {
+            vy *= -0.8;
+            y = y < 0 ? 0 : canvas.offsetHeight - div.offsetHeight;
+        }
     }
 
     ideaObject.x = x; ideaObject.y = y;
@@ -162,35 +148,7 @@ function updateIdeaMovement(ideaObject, deltaTime) {
     div.style.transform = `translate(${x}px, ${y}px)`;
 }
 
-function checkIdeaCollisions() {
-    for (let i = 0; i < IDEAS.length; i++) {
-        for (let j = i + 1; j < IDEAS.length; j++) {
-            const a = IDEAS[i]; const b = IDEAS[j];
-            const rA = a.div.getBoundingClientRect(); const rB = b.div.getBoundingClientRect();
-
-            if (rA.left < rB.right && rA.right > rB.left && rA.top < rB.bottom && rA.bottom > rB.top) {
-                // 충돌 시 속도 교환 (좀 더 부드럽게)
-                const tempVx = a.vx; const tempVy = a.vy;
-                a.vx = b.vx * 0.9; b.vx = tempVx * 0.9; // 속도 약간 감소
-                a.vy = b.vy * 0.9; b.vy = tempVy * 0.9;
-
-                // 겹침 방지를 위해 즉시 밀어냄
-                const overlapX = Math.min(rA.right - rB.left, rB.right - rA.left);
-                const overlapY = Math.min(rA.bottom - rB.top, rB.bottom - rA.top);
-
-                if (overlapX < overlapY) { // X축으로 겹침
-                    if (rA.left < rB.left) a.x -= overlapX / 2;
-                    else b.x -= overlapX / 2;
-                } else { // Y축으로 겹침
-                    if (rA.top < rB.top) a.y -= overlapY / 2;
-                    else b.y -= overlapY / 2;
-                }
-            }
-        }
-    }
-}
-
-// 5. 유틸리티 및 초기화
+// 5. 초기화 및 이벤트
 function isOverTrashCan(div, trash) {
     const r1 = div.getBoundingClientRect(); const r2 = trash.getBoundingClientRect();
     return !(r1.right < r2.left || r1.left > r2.right || r1.bottom < r2.top || r1.top > r2.bottom);
@@ -200,12 +158,12 @@ function applyModeStyle(idea) {
     idea.div.classList.remove('piano-white', 'piano-black');
     if (currentMode === 'piano') {
         idea.div.classList.add(Math.random() > 0.5 ? 'piano-black' : 'piano-white');
-        idea.vx = -(Math.random() * 2 + 2); // Piano Mode 속도 조정
+        idea.vx = -(Math.random() * 2 + 2);
         idea.vy = 0;
     } else {
         const angle = Math.random() * 2 * Math.PI;
-        idea.vx = Math.cos(angle) * (IDEA_BASE_SPEED + Math.random() * 1);
-        idea.vy = Math.sin(angle) * (IDEA_BASE_SPEED + Math.random() * 1);
+        idea.vx = Math.cos(angle) * 2;
+        idea.vy = Math.sin(angle) * 2;
     }
 }
 
@@ -213,19 +171,15 @@ modeToggleButton.addEventListener('click', () => {
     currentMode = currentMode === 'bounce' ? 'piano' : 'bounce';
     modeToggleButton.textContent = currentMode === 'piano' ? 'Piano Mode' : 'Flow Mode';
     modeToggleButton.classList.toggle('active', currentMode === 'piano');
-    
-    IDEAS.forEach(idea => {
-        applyModeStyle(idea); // 모드 변경 시 기존 아이디어에도 스타일 적용
-    });
-    saveToLocal(); // 모드 변경사항 저장
+    IDEAS.forEach(applyModeStyle);
+    saveToLocal();
 });
 
-// 입력 핸들러 통합 (중복 실행 방지)
 function submitAction() {
     const text = ideaInput.value.trim();
     if (text) {
         createIdeaElement(text);
-        ideaInput.value = ''; // 입력창 비우기
+        ideaInput.value = '';
         saveToLocal();
     }
 }
@@ -233,23 +187,18 @@ function submitAction() {
 submitIdeaButton.addEventListener('click', submitAction);
 ideaInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-        e.preventDefault(); // 기본 폼 제출 동작 방지
+        e.preventDefault();
         submitAction();
     }
 });
 
-
 function animate(currentTime) {
-    if (!lastTime) lastTime = currentTime;
-    const deltaTime = currentTime - lastTime;
+    const deltaTime = currentTime - (lastTime || currentTime);
     lastTime = currentTime;
-
     IDEAS.forEach(i => updateIdeaMovement(i, deltaTime));
-    if (currentMode === 'bounce') checkIdeaCollisions();
-    
     requestAnimationFrame(animate);
 }
 
-// 애플리케이션 시작 시
+// 시작
 loadFromLocal();
 requestAnimationFrame(animate);
