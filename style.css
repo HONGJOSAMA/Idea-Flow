@@ -143,3 +143,20 @@ body {
 #font-bigger:hover {
     background: rgba(0,0,0,0.12);
 }
+
+#reset-all {
+    background: rgba(255, 59, 48, 0.1); /* Apple Red 연하게 */
+    border: none;
+    padding: 0 16px;
+    border-radius: 14px;
+    font-weight: 600;
+    color: #ff3b30;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#reset-all:hover {
+    background: #ff3b30;
+    color: white;
+    transform: scale(1.05);
+}

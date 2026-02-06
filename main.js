@@ -213,6 +213,24 @@ modeToggleButton.onclick = () => {
     saveToLocal();
 };
 
+const resetButton = document.getElementById('reset-all');
+
+resetButton.onclick = () => {
+    // 모든 아이디어 제거
+    IDEAS.forEach(i => i.div.remove());
+    IDEAS = [];
+
+    // 선택 상태 초기화
+    if (selectedIdea) {
+        selectedIdea.div.classList.remove('selected');
+        selectedIdea = null;
+    }
+
+    // 로컬 스토리지 초기화
+    localStorage.removeItem('apple_canvas_final_v3');
+    saveToLocal(); // 빈 상태를 저장
+};
+
 /* ===============================
    Word 스타일 글자 크기 조절
 ================================ */
@@ -274,9 +292,44 @@ smallerBtn.onclick = () => {
     saveToLocal();
 };
 
+/* ===============================
+   아이디어 간 충돌 처리
+================================ */
+
+function handleIdeaCollisions() {
+    for (let i = 0; i < IDEAS.length; i++) {
+        for (let j = i + 1; j < IDEAS.length; j++) {
+            const a = IDEAS[i];
+            const b = IDEAS[j];
+
+            const dx = (a.x + a.div.offsetWidth / 2) - (b.x + b.div.offsetWidth / 2);
+            const dy = (a.y + a.div.offsetHeight / 2) - (b.y + b.div.offsetHeight / 2);
+
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const minDist = (a.div.offsetWidth + b.div.offsetWidth) / 4;
+
+            if (distance < minDist && distance > 0) {
+                const angle = Math.atan2(dy, dx);
+                const force = 0.8;
+
+                const fx = Math.cos(angle) * force;
+                const fy = Math.sin(angle) * force;
+
+                a.vx += fx;
+                a.vy += fy;
+                b.vx -= fx;
+                b.vy -= fy;
+            }
+        }
+    }
+}
+
 function animate(currentTime) {
     const deltaTime = Math.min(currentTime - lastTime, 100); 
     lastTime = currentTime;
+
+    handleIdeaCollisions(); // ✅ 충돌 처리
+
     IDEAS.forEach(i => updateIdeaMovement(i, deltaTime));
     requestAnimationFrame(animate);
 }
