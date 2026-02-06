@@ -120,3 +120,26 @@ body {
     transform: scale(1.2);
     color: white;
 }
+
+/* 선택된 아이디어 표시 (Word 느낌) */
+.idea.selected {
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.4);
+}
+
+/* 글자 크기 버튼 */
+#font-smaller,
+#font-bigger {
+    background: rgba(0,0,0,0.05);
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#font-smaller:hover,
+#font-bigger:hover {
+    background: rgba(0,0,0,0.12);
+}

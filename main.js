@@ -19,7 +19,8 @@ function saveToLocal() {
         y: i.y,
         vx: i.vx,
         vy: i.vy,
-        modeClass: Array.from(i.div.classList).join(' ')
+        modeClass: Array.from(i.div.classList).join(' '),
+        fontSize: i.div.style.fontSize || null // 글자 크기 저장
     }));
     localStorage.setItem('apple_canvas_final_v3', JSON.stringify(data));
 }
@@ -64,7 +65,13 @@ function createIdeaElement(text, savedData = null) {
         applyModeStyle(ideaObject);
     }
     
+    // 글자 크기 로드
+    if (savedData && savedData.fontSize) {
+        ideaDiv.style.fontSize = savedData.fontSize;
+    }
+
     ideaDiv.addEventListener('mousedown', (e) => onMouseDown(e, ideaObject));
+    attachSelectionHandler(ideaObject); // 아이디어 생성 시 선택 핸들러 부착
     IDEAS.push(ideaObject);
 }
 
@@ -195,6 +202,67 @@ modeToggleButton.onclick = () => {
     modeToggleButton.textContent = currentMode === 'piano' ? 'Piano Mode' : 'Flow Mode';
     modeToggleButton.classList.toggle('active', currentMode === 'piano');
     IDEAS.forEach(applyModeStyle);
+    saveToLocal();
+};
+
+/* ===============================
+   Word 스타일 글자 크기 조절
+================================ */
+
+// 선택된 아이디어 상태
+let selectedIdea = null;
+
+// 아이디어 클릭 → 선택
+function attachSelectionHandler(ideaObject) {
+    ideaObject.div.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        if (selectedIdea) {
+            selectedIdea.div.classList.remove('selected');
+        }
+
+        selectedIdea = ideaObject;
+        ideaObject.div.classList.add('selected');
+    });
+}
+
+// 캔버스 클릭 → 선택 해제
+canvas.addEventListener('click', () => {
+    if (selectedIdea) {
+        selectedIdea.div.classList.remove('selected');
+        selectedIdea = null;
+    }
+});
+
+// 글자 크기 버튼
+const biggerBtn = document.getElementById('font-bigger');
+const smallerBtn = document.getElementById('font-smaller');
+
+const FONT_STEP = 2;
+const MIN_FONT = 10;
+const MAX_FONT = 40;
+
+biggerBtn.onclick = () => {
+    if (!selectedIdea) return;
+
+    const current = parseInt(
+        window.getComputedStyle(selectedIdea.div).fontSize
+    );
+    const next = Math.min(current + FONT_STEP, MAX_FONT);
+
+    selectedIdea.div.style.fontSize = next + 'px';
+    saveToLocal();
+};
+
+smallerBtn.onclick = () => {
+    if (!selectedIdea) return;
+
+    const current = parseInt(
+        window.getComputedStyle(selectedIdea.div).fontSize
+    );
+    const next = Math.max(current - FONT_STEP, MIN_FONT);
+
+    selectedIdea.div.style.fontSize = next + 'px';
     saveToLocal();
 };
 
