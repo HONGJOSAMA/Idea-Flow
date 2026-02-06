@@ -150,10 +150,12 @@ function updateIdeaMovement(ideaObject, deltaTime) {
     if (currentMode === 'piano') {
         // ⬅️ 왼쪽으로 완전히 벗어나면
         if (x + w < 0) {
-            // 👉 오른쪽 바깥에서 자연스럽게 다시 등장
-            x = canvas.offsetWidth + w;
+            // 👉 오른쪽 바깥에서 다시 등장
+            x = canvas.offsetWidth;
+            // 🎲 Y 위치도 랜덤하게 변경 (더 자연스러움)
+            y = Math.random() * (canvas.offsetHeight - h);
 
-            // 🎨 다시 등장할 때 흑 / 백 랜덤 적용
+            // 🎨 색상도 랜덤하게 재설정
             div.classList.remove('piano-white', 'piano-black');
             div.classList.add(
                 Math.random() > 0.5 ? 'piano-black' : 'piano-white'
@@ -184,6 +186,10 @@ function applyModeStyle(idea) {
             Math.random() > 0.5 ? 'piano-black' : 'piano-white'
         );
 
+        // 📍 오른쪽 바깥에서 시작
+        idea.x = canvas.offsetWidth + idea.div.offsetWidth;
+        idea.y = Math.random() * (canvas.offsetHeight - idea.div.offsetHeight); // Corrected this line
+        
         // ⬅️ 왼쪽으로 일정 속도로 이동
         idea.vx = -(1.2 + Math.random() * 0.8);
         idea.vy = 0;
