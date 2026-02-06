@@ -148,10 +148,10 @@ function updateIdeaMovement(ideaObject, deltaTime) {
     const h = div.offsetHeight;
 
     if (currentMode === 'piano') {
-        // ⬅️ 왼쪽으로 완전히 벗어나면 (안 보일 때)
+        // ⬅️ 왼쪽으로 완전히 벗어나면
         if (x + w < 0) {
-            // 👉 오른쪽 완전 바깥으로 이동 (요소 전체가 안 보이게)
-            x = canvas.offsetWidth + 10; // ✅ +10으로 완전히 밖에 배치
+            // 👉 오른쪽 완전 바깥으로 이동 (화면 밖에서 텔레포트)
+            x = canvas.offsetWidth + w + 50; // ✅ 요소 너비 + 여유 공간
             // 🎲 Y 위치도 랜덤하게 변경
             y = Math.random() * (canvas.offsetHeight - h);
 
@@ -162,14 +162,14 @@ function updateIdeaMovement(ideaObject, deltaTime) {
             );
         }
         
-        // 🔝🔽 위아래 경계 처리 (바운스)
+        // 🔝🔽 위아래 경계 처리 (바운스 없이 고정)
         if (y < 0) {
             y = 0;
-            vy *= -0.7;
+            vy = 0; // ✅ 바운스 제거
         }
         if (y + h > canvas.offsetHeight) {
             y = canvas.offsetHeight - h;
-            vy *= -0.7;
+            vy = 0; // ✅ 바운스 제거
         }
     } else {
         if (x + w > canvas.offsetWidth || x < 0) { vx *= -0.7; x = x < 0 ? 0 : canvas.offsetWidth - w; }
@@ -329,6 +329,9 @@ smallerBtn.onclick = () => {
 ================================ */
 
 function handleIdeaCollisions() {
+    // ✅ 피아노 모드에서는 충돌 처리 비활성화
+    if (currentMode === 'piano') return;
+    
     for (let i = 0; i < IDEAS.length; i++) {
         for (let j = i + 1; j < IDEAS.length; j++) {
             const a = IDEAS[i];
@@ -355,7 +358,6 @@ function handleIdeaCollisions() {
         }
     }
 }
-
 function animate(currentTime) {
     const deltaTime = Math.min(currentTime - lastTime, 100); 
     lastTime = currentTime;
