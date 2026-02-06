@@ -147,21 +147,41 @@ function updateIdeaMovement(ideaObject, deltaTime) {
     const w = div.offsetWidth;
     const h = div.offsetHeight;
 
+    /* ===============================
+       🎹 PIANO MODE (완전 분리)
+    ================================ */
     if (currentMode === 'piano') {
-        // ⬅️ 왼쪽으로 완전히 벗어나면
+
+        // ⬅️ 왼쪽으로 완전히 나가면
         if (x + w < 0) {
-            // 👉 오른쪽 바깥에서 자연스럽게 다시 등장
+            // 👉 오른쪽 바깥에서 자연스럽게 이어서 등장
             x = canvas.offsetWidth + w;
 
-            // 🎨 다시 등장할 때 흑 / 백 랜덤 적용
+            // 🎨 등장 시 흑 / 백 랜덤
             div.classList.remove('piano-white', 'piano-black');
             div.classList.add(
                 Math.random() > 0.5 ? 'piano-black' : 'piano-white'
             );
         }
-    } else {
-        if (x + w > canvas.offsetWidth || x < 0) { vx *= -0.7; x = x < 0 ? 0 : canvas.offsetWidth - w; }
-        if (y + h > canvas.offsetHeight || y < 0) { vy *= -0.7; y = y < 0 ? 0 : canvas.offsetHeight - h; }
+
+        // 👉 위치 적용 후 바로 종료 (❗ bounce 방지)
+        ideaObject.x = x;
+        ideaObject.y = y;
+        div.style.transform = `translate(${x}px, ${y}px)`;
+        return;
+    }
+
+    /* ===============================
+       🌊 BOUNCE MODE (기존)
+    ================================ */
+    if (x + w > canvas.offsetWidth || x < 0) {
+        vx *= -0.7;
+        x = x < 0 ? 0 : canvas.offsetWidth - w;
+    }
+
+    if (y + h > canvas.offsetHeight || y < 0) {
+        vy *= -0.7;
+        y = y < 0 ? 0 : canvas.offsetHeight - h;
     }
 
     ideaObject.x = x; ideaObject.y = y;
