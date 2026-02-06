@@ -138,6 +138,7 @@ function onMouseDown(e, ideaObj) {
 
 // 4. 물리 및 경계 처리
 // 4. 물리 및 경계 처리
+// 4. 물리 및 경계 처리
 function updateIdeaMovement(ideaObject, deltaTime) {
     if (isDragging && draggedIdea === ideaObject) return;
     
@@ -154,36 +155,30 @@ function updateIdeaMovement(ideaObject, deltaTime) {
             // 🚫 잠시 숨김
             div.style.opacity = '0';
             
-            // 👉 오른쪽 완전 바깥으로 이동 (화면 밖에서 텔레포트)
-            x = canvas.offsetWidth + w + 50; // ✅ 요소 너비 + 여유 공간
-            // 🎲 Y 위치도 랜덤하게 변경
+            // 👉 오른쪽 완전 바깥으로 이동
+            x = canvas.offsetWidth + w + 50;
             y = Math.random() * (canvas.offsetHeight - h);
 
-            // 🎨 색상도 랜덤하게 재설정
+            // 🎨 색상 재설정
             div.classList.remove('piano-white', 'piano-black');
             div.classList.add(
                 Math.random() > 0.5 ? 'piano-black' : 'piano-white'
             );
             
-            // ✅ 위치 즉시 적용 (숨긴 상태에서)
-            div.style.transform = `translate(${x}px, ${y}px)`;
-            
             // 🎬 다음 프레임에서 다시 보이게
-            requestAnimationFrame(() => {
+            setTimeout(() => {
                 div.style.opacity = '1';
-            });
-            
-            return; // 이번 프레임은 여기서 종료
+            }, 50);
         }
         
-        // 🔝🔽 위아래 경계 처리 (바운스 없이 고정)
+        // 🔝🔽 위아래 경계 처리
         if (y < 0) {
             y = 0;
-            vy = 0; // ✅ 바운스 제거
+            vy = 0;
         }
         if (y + h > canvas.offsetHeight) {
             y = canvas.offsetHeight - h;
-            vy = 0; // ✅ 바운스 제거
+            vy = 0;
         }
     } else {
         if (x + w > canvas.offsetWidth || x < 0) { vx *= -0.7; x = x < 0 ? 0 : canvas.offsetWidth - w; }
