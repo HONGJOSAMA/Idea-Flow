@@ -148,11 +148,11 @@ function updateIdeaMovement(ideaObject, deltaTime) {
     const h = div.offsetHeight;
 
     if (currentMode === 'piano') {
-        // ⬅️ 왼쪽으로 완전히 벗어나면
+        // ⬅️ 왼쪽으로 완전히 벗어나면 (안 보일 때)
         if (x + w < 0) {
-            // 👉 오른쪽 바깥에서 다시 등장
-            x = canvas.offsetWidth;
-            // 🎲 Y 위치도 랜덤하게 변경 (더 자연스러움)
+            // 👉 오른쪽 완전 바깥으로 이동 (요소 전체가 안 보이게)
+            x = canvas.offsetWidth + 10; // ✅ +10으로 완전히 밖에 배치
+            // 🎲 Y 위치도 랜덤하게 변경
             y = Math.random() * (canvas.offsetHeight - h);
 
             // 🎨 색상도 랜덤하게 재설정
@@ -160,6 +160,16 @@ function updateIdeaMovement(ideaObject, deltaTime) {
             div.classList.add(
                 Math.random() > 0.5 ? 'piano-black' : 'piano-white'
             );
+        }
+        
+        // 🔝🔽 위아래 경계 처리 (바운스)
+        if (y < 0) {
+            y = 0;
+            vy *= -0.7;
+        }
+        if (y + h > canvas.offsetHeight) {
+            y = canvas.offsetHeight - h;
+            vy *= -0.7;
         }
     } else {
         if (x + w > canvas.offsetWidth || x < 0) { vx *= -0.7; x = x < 0 ? 0 : canvas.offsetWidth - w; }
